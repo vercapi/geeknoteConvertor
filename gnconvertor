@@ -1,6 +1,7 @@
+import geeknoteConvertor.geeknoteConvertorLib
+
 import os
 import sys
-import geeknoteConvertorLib
 
 
 if len(sys.argv) >= 2:
@@ -25,6 +26,3 @@ if len(sys.argv) >= 2:
         vSourceFile.close()
         vDestinationFile.close()
         os.remove(vTmp)
-    
-
-    

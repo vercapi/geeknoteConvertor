@@ -1,0 +1,39 @@
+* Org objects
+
+** Hierararchy
+
+*** Sub item
+*** TODO This is a task
+
+**** Lowest level
+*** DONE This is a done task
+
+** Links
+
+[[www.google.com][Link to goolge]]
+
+** Tables
+
+Demo of a table
+
+| id | name        | description              |
+|----+-------------+--------------------------|
+|  1 | Page one    | This is some longer text |
+|  2 | Other thing | This is awesome          | 
+
+** Code
+
+Let's insert some code
+
+#+BEGIN_SRC python :results output
+  
+  x = 2 + 2
+  print("The sum is: "+str(x))
+  
+#+END_SRC python
+
+#+RESULTS:
+: The sum is: 4
+
+
+
