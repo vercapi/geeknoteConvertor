@@ -180,6 +180,37 @@ class TestGeeknoteConvertor(unittest.TestCase):
         result = orgWriter.generate()
         self.assertEqual(target, result)                
 
+    def testFindTableStart(self):
+        source = ["kjsqklfjmqsdf sdf<table>","klsdkfjlsdf<ld/> sdfs","f</table>qsdqsd<table></table>"]
+        
+        expected = geeknoteConvertorLib.CacheLocation(0, 17)
+
+        start = geeknoteConvertorLib.CacheLocation(0,0)
+        result = geeknoteConvertorLib.OrgHTMLParser.findTableStart(start, source)
+        self.assertEqual(expected, result)
+
+
+    def testFindTableEnd(self):
+        source = ["kjsqklfjmqsdf sdf<table>","klsdkfjlsdf<ld/> sdfs","f</table>qsdqsd<table></table>"]
+        
+        expected = geeknoteConvertorLib.CacheLocation(2, 1)
+
+        start = geeknoteConvertorLib.CacheLocation(0,0)
+        start = geeknoteConvertorLib.OrgHTMLParser.findTableStart(start, source)
+        result = geeknoteConvertorLib.OrgHTMLParser.findTableEnd(start, source)
+        self.assertEqual(expected, result)
+
+    def testFindTableEndFormatMess(self):
+        source = ["kjsqklfjmqsdf</table> sdf<table></table>","klsdkfjlsdf<ld/> sdfs","f</table>qsdqsd<table></table>"]
+        
+        expected = geeknoteConvertorLib.CacheLocation(0, 32)
+
+        start = geeknoteConvertorLib.CacheLocation(0,0)
+        start = geeknoteConvertorLib.OrgHTMLParser.findTableStart(start, source)
+        result = geeknoteConvertorLib.OrgHTMLParser.findTableEnd(start, source)
+        self.assertEqual(expected, result)
+
+
 # <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 

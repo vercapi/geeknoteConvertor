@@ -35,7 +35,28 @@ class OrgHTMLParser(HTMLParser):
 
     def getTable(self):
         return self.__currentTable
-        
+
+    def findTableStart(pCacheLocationStart, pSource):
+        return OrgHTMLParser.__findElementInCache(pCacheLocationStart, pSource, "<table>")
+
+    def findTableEnd(pCacheLocationStart, pSource):
+        return OrgHTMLParser.__findElementInCache(pCacheLocationStart, pSource, "</table>")
+
+    def __findElementInCache(pCacheLocationStart, pSource, pElement):
+        vSearchArea = pSource[pCacheLocationStart.getLineNum():]
+        vSearchIndex = pCacheLocationStart.getIndex()
+        vIndex = -1
+        vLineNum = -1
+
+        for index, line in enumerate(vSearchArea):
+            vIndex = line.find(pElement, vSearchIndex)
+            vSearchIndex = 0
+            if vIndex >= 0:                
+                vLineNum = index
+                break
+
+        vCacheLocation = CacheLocation(vLineNum, vIndex)
+        return vCacheLocation
         
 class OrgTable:
     
@@ -128,7 +149,32 @@ class OrgWriter:
         vSize = self.__orgTable.getColumnSize(pColIdx)
         vContent = self.__orgTable.getColumnContent(pColIdx, pRowIdx)
         return " "+vContent.ljust(vSize+1)+"|"
-        
+
+
+class CacheLocation(object):
+
+    def __init__(self, pLineNum, pIndex):
+        self.__lineNum = pLineNum
+        self.__index = pIndex
+
+    def getIndex(self):
+        return self.__index
+
+    def getLineNum(self):
+        return self.__lineNum
+
+    def __eq__(self, other):
+        vEquals = False
+        if isinstance(other, self.__class__):
+            vEquals = other.getLineNum() == self.__lineNum and other.getIndex() == self.__index
+
+        return vEquals
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __str__(self):
+        return str(self.__class__)+" -> "+"index: "+str(self.__index)+", lineNum:"+str(self.__lineNum)
 
 # Characters to escape
 fEscapeChars = ["_", "[", "]", "*"]
@@ -184,7 +230,8 @@ def replaceChar(pLine, pChar, pSubstitute):
     vResult = re.sub(re.escape(pChar), pSubstitute, pLine)
     return vResult
 
-def parseHTML(pHTML):
+def convertTables(pHTML):
+    #TODO: 
     None
 
 
