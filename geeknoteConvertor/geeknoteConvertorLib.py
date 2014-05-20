@@ -40,7 +40,9 @@ class OrgHTMLParser(HTMLParser):
         return OrgHTMLParser.__findElementInCache(pCacheLocationStart, pSource, "<table>")
 
     def findTableEnd(pCacheLocationStart, pSource):
-        return OrgHTMLParser.__findElementInCache(pCacheLocationStart, pSource, "</table>")
+        vOriginalCacheLocation = OrgHTMLParser.__findElementInCache(pCacheLocationStart, pSource, "</table>")
+        vCacheLocation = CacheLocation(vOriginalCacheLocation.getLineNum(), vOriginalCacheLocation.getIndex()+7)
+        return vCacheLocation
 
     def __findElementInCache(pCacheLocationStart, pSource, pElement):
         vSearchArea = pSource[pCacheLocationStart.getLineNum():]
@@ -54,6 +56,11 @@ class OrgHTMLParser(HTMLParser):
             if vIndex >= 0:                
                 vLineNum = index
                 break
+
+        if vIndex >=0:
+            vLineNum += pCacheLocationStart.getLineNum()
+        else:
+            vLineNum = -1
 
         vCacheLocation = CacheLocation(vLineNum, vIndex)
         return vCacheLocation
@@ -163,12 +170,48 @@ class CacheLocation(object):
     def getLineNum(self):
         return self.__lineNum
 
+    def getZeroCacheLocation():
+        return CacheLocation(0,0)
+
+    def getNotFoundCacheLocation():
+        return CacheLocation(-1, -1)
+
     def __eq__(self, other):
         vEquals = False
         if isinstance(other, self.__class__):
             vEquals = other.getLineNum() == self.__lineNum and other.getIndex() == self.__index
 
         return vEquals
+
+    def __lt__(self, other):
+        return -1 == self.__compare(other)
+
+    def __gt__(self, other):
+        return 1 == self.__compare(other)
+
+    def __ge__(self, other):
+        return self.__compare(other) in (1,0)
+
+    def __le__(self, other):
+        return self.__compare(other) in (-1,0)
+
+    def __compare(self, other):
+        vCmp = 0
+        
+        if(self.__lineNum == other.getLineNum()):
+            if(self.__index == other.getIndex()):
+                vCmp = 0
+            elif(self.__index > other.getIndex()):
+                vCmp = 1
+            else:
+                vCmp = -1
+        else:
+            if(self.__lineNum > other.getLineNum()):
+                vCmp = 1
+            else:
+                vCmp = -1
+
+        return vCmp
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -230,10 +273,39 @@ def replaceChar(pLine, pChar, pSubstitute):
     vResult = re.sub(re.escape(pChar), pSubstitute, pLine)
     return vResult
 
-def convertTables(pHTML):
-    #TODO: 
-    None
+def replaceTables(pHTML):
+    vCache = pHTML
+    
+    zero = CacheLocation.getZeroCacheLocation()
+    vStartLocation = OrgHTMLParser.findTableStart(zero, pHTML)
 
+    while vStartLocation != CacheLocation.getNotFoundCacheLocation():
+        vEndLocation = OrgHTMLParser.findTableEnd(vStartLocation, vCache)
+        if vEndLocation > zero:
+            vNewCache = vCache[:vStartLocation.getLineNum()]
+            vLine = [vCache[vStartLocation.getLineNum()][:vStartLocation.getIndex()]]
+            if len(vLine[0]) > 0:
+                vNewCache += vLine
+            
+            vReplacement = [vCache[vStartLocation.getLineNum()][vStartLocation.getIndex():]]
+            vReplacement += vCache[vStartLocation.getLineNum()+1:vEndLocation.getLineNum()]
+            if vEndLocation.getLineNum() > vStartLocation.getLineNum():
+                vReplacement += [vCache[vEndLocation.getLineNum()][:vEndLocation.getIndex()]]
+
+            vParser = OrgHTMLParser()
+            vParser.feed(''.join(vReplacement))
+            vOrgTable = vParser.getTable()
+            vOrgWriter = OrgWriter(vOrgTable)
+            vNewCache += vOrgWriter.generate().splitlines()
+
+            vLine = [vCache[vEndLocation.getLineNum()][vEndLocation.getIndex()+1:]]
+            if len(vLine[0]) > 0:
+                vNewCache += vLine
+            vNewCache += vCache[vEndLocation.getLineNum()+1:]
+        vStartLocation = OrgHTMLParser.findTableStart(vEndLocation, vNewCache)
+#        vCache = vNewCache
+
+    return vNewCache
 
 def org2ever(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)

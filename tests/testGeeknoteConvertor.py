@@ -193,7 +193,7 @@ class TestGeeknoteConvertor(unittest.TestCase):
     def testFindTableEnd(self):
         source = ["kjsqklfjmqsdf sdf<table>","klsdkfjlsdf<ld/> sdfs","f</table>qsdqsd<table></table>"]
         
-        expected = geeknoteConvertorLib.CacheLocation(2, 1)
+        expected = geeknoteConvertorLib.CacheLocation(2, 8)
 
         start = geeknoteConvertorLib.CacheLocation(0,0)
         start = geeknoteConvertorLib.OrgHTMLParser.findTableStart(start, source)
@@ -203,12 +203,86 @@ class TestGeeknoteConvertor(unittest.TestCase):
     def testFindTableEndFormatMess(self):
         source = ["kjsqklfjmqsdf</table> sdf<table></table>","klsdkfjlsdf<ld/> sdfs","f</table>qsdqsd<table></table>"]
         
-        expected = geeknoteConvertorLib.CacheLocation(0, 32)
+        expected = geeknoteConvertorLib.CacheLocation(0, 39)
 
         start = geeknoteConvertorLib.CacheLocation(0,0)
         start = geeknoteConvertorLib.OrgHTMLParser.findTableStart(start, source)
         result = geeknoteConvertorLib.OrgHTMLParser.findTableEnd(start, source)
         self.assertEqual(expected, result)
+
+    def testCacheLocationCmpEquals(self):
+        targetA = geeknoteConvertorLib.CacheLocation(9,7)
+        targetB = geeknoteConvertorLib.CacheLocation(9,7)
+        
+        self.assertTrue(targetA == targetB) 
+
+    def testCacheLocationCmpSmallerLines(self):
+        targetA = geeknoteConvertorLib.CacheLocation(9,7)
+        targetB = geeknoteConvertorLib.CacheLocation(10,7)
+        
+        self.assertTrue(targetA < targetB) 
+
+    def testCacheLocationCmpBiggerLines(self):
+        targetA = geeknoteConvertorLib.CacheLocation(9,7)
+        targetB = geeknoteConvertorLib.CacheLocation(6,7)
+        
+        self.assertTrue(targetA > targetB) 
+
+    def testCacheLocationCmpSmallerIndex(self):
+        targetA = geeknoteConvertorLib.CacheLocation(9,6)
+        targetB = geeknoteConvertorLib.CacheLocation(9,7)
+        
+        self.assertTrue(targetA < targetB) 
+
+    def testCacheLocationCmpBiggerIndex(self):
+        targetA = geeknoteConvertorLib.CacheLocation(9,11)
+        targetB = geeknoteConvertorLib.CacheLocation(9,8)
+        
+        self.assertTrue(targetA > targetB) 
+
+
+    def testCacheLocationCmpSmallerOrEqualsIndex(self):
+        targetA = geeknoteConvertorLib.CacheLocation(9,6)
+        targetB = geeknoteConvertorLib.CacheLocation(9,7)
+        
+        self.assertTrue(targetA <= targetB) 
+
+    def testCacheLocationCmpBiggerOrEqualsIndex(self):
+        targetA = geeknoteConvertorLib.CacheLocation(9,11)
+        targetB = geeknoteConvertorLib.CacheLocation(9,8)
+        
+        self.assertTrue(targetA >= targetB) 
+
+    def testCacheLocationCmpSmallerOrEqualsEqualsIndex(self):
+        targetA = geeknoteConvertorLib.CacheLocation(9,7)
+        targetB = geeknoteConvertorLib.CacheLocation(9,7)
+        
+        self.assertTrue(targetA <= targetB) 
+
+    def testCacheLocationCmpBiggerOrEqualsEqualsIndex(self):
+        targetA = geeknoteConvertorLib.CacheLocation(9,11)
+        targetB = geeknoteConvertorLib.CacheLocation(9,11)
+        
+        self.assertTrue(targetA >= targetB) 
+
+    def testReplaceTables(self):
+        #TODO: Source needs to be real tables, see comments below
+        source = ["bvnbvnvnbvn qsdqsdqd<table><tr><th>id</th><th>description</th></tr><tr><td>1</td><td>text</td></tr></table>","azeaeezaeae<ld/> sdfs","iopiipippp></p>"]
+        
+        target = ["bvnbvnvnbvn qsdqsdqd"]
+
+        targetStr =  "|----+-------------|\n"
+        targetStr += "| id | description |\n"
+        targetStr += "|----+-------------|\n"
+        targetStr += "| 1  | text        |\n"
+        targetStr += "|----+-------------|\n"
+        target += targetStr.splitlines()
+        target += ["azeaeezaeae<ld/> sdfs","iopiipippp></p>"]
+
+        result = geeknoteConvertorLib.replaceTables(source)
+
+
+        self.assertEqual(target, result)
 
 
 # <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
