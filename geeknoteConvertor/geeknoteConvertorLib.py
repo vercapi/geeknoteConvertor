@@ -1,5 +1,6 @@
 import re
 from html.parser import HTMLParser
+from subprocess import call
 
 class OrgHTMLParser(HTMLParser):
 
@@ -37,7 +38,7 @@ class OrgHTMLParser(HTMLParser):
         return self.__currentTable
 
     def findTableStart(pCacheLocationStart, pSource):
-        return OrgHTMLParser.__findElementInCache(pCacheLocationStart, pSource, "<table>")
+        return OrgHTMLParser.__findElementInCache(pCacheLocationStart, pSource, "<table")
 
     def findTableEnd(pCacheLocationStart, pSource):
         vOriginalCacheLocation = OrgHTMLParser.__findElementInCache(pCacheLocationStart, pSource, "</table>")
@@ -52,6 +53,7 @@ class OrgHTMLParser(HTMLParser):
 
         for index, line in enumerate(vSearchArea):
             vIndex = line.find(pElement, vSearchIndex)
+            print("index: "+str(vIndex))
             vSearchIndex = 0
             if vIndex >= 0:                
                 vLineNum = index
@@ -302,19 +304,21 @@ def replaceTables(pHTML):
             if len(vLine[0]) > 0:
                 vNewCache += vLine
             vNewCache += vCache[vEndLocation.getLineNum()+1:]
+            vCache = vNewCache
         vStartLocation = OrgHTMLParser.findTableStart(vEndLocation, vNewCache)
-#        vCache = vNewCache
 
-    return vNewCache
+    return vCache
 
 def org2ever(pSourceFile, pDestinationFile):
-    vCache = cacheFile(pSourceFile)
-    vCache =  escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
-    writeFile(pDestinationFile, vCache)
+    None
+    # vCache = cacheFile(pSourceFile)
+    # vCache =  escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
+    # writeFile(pDestinationFile, vCache)
 
 def ever2org(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
-    vCache =unescapeCharsFile(vCache, fEscapeChars)
+    vCache = unescapeCharsFile(vCache, fEscapeChars)
+    vCache = replaceTables(vCache)
     writeFile(pDestinationFile, vCache)
 
 def cacheFile(pSourceFile):
@@ -326,4 +330,6 @@ def cacheFile(pSourceFile):
 
 def writeFile(pDestinationFile, pCache):
     for line in pCache:
+        if not line.endswith("\n"):
+            line += "\n"
         pDestinationFile.write(line)

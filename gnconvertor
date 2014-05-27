@@ -1,4 +1,4 @@
-import geeknoteConvertor.geeknoteConvertorLib
+from geeknoteConvertor import geeknoteConvertorLib
 
 import os
 import sys
@@ -16,13 +16,13 @@ if len(sys.argv) >= 2:
         vSourceFile.close()
         vDestinationFile.close()
     
-    os.system("emacsclient "+vTmp)
-
-    vSourceFile = open(vTmp, "r")
-    vDestinationFile = open(vOriginal, "w+")
-    try:
-        geeknoteConvertorLib.org2ever(vSourceFile, vDestinationFile)
-    finally:
-        vSourceFile.close()
-        vDestinationFile.close()
-        os.remove(vTmp)
+#     os.system("emacsclient "+vTmp)
+# 
+#     vSourceFile = open(vTmp, "r")
+#     vDestinationFile = open(vOriginal, "w+")
+#     try:
+#         geeknoteConvertorLib.org2ever(vSourceFile, vDestinationFile)
+#     finally:
+#         vSourceFile.close()
+#         vDestinationFile.close()
+#         os.remove(vTmp)
