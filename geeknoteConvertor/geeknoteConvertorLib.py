@@ -45,6 +45,21 @@ class OrgHTMLParser(HTMLParser):
         vCacheLocation = CacheLocation(vOriginalCacheLocation.getLineNum(), vOriginalCacheLocation.getIndex()+7)
         return vCacheLocation
 
+    def findFirstDiv(pSource):
+        vCacheLocation = CacheLocation(0,0)
+        return OrgHTMLParser.__findElementInCache(vCacheLocation, pSource, "<div")
+
+    def findLastDiv(pSource):
+        vResultCacheLocation = CacheLocation.getNotFoundCacheLocation()
+        vCacheLocation = CacheLocation(0,0)
+        vCacheLocation = OrgHTMLParser.__findElementInCache(vCacheLocation, pSource, "</div>")
+        while vCacheLocation != CacheLocation.getNotFoundCacheLocation():
+            vCacheLocation = CacheLocation(vCacheLocation.getLineNum(), vCacheLocation.getIndex()+5)
+            vResultCacheLocation = vCacheLocation
+            vCacheLocation = OrgHTMLParser.__findElementInCache(vCacheLocation, pSource, "</div>")
+
+        return vResultCacheLocation
+
     def __findElementInCache(pCacheLocationStart, pSource, pElement):
         vSearchArea = pSource[pCacheLocationStart.getLineNum():]
         vSearchIndex = pCacheLocationStart.getIndex()
@@ -53,7 +68,6 @@ class OrgHTMLParser(HTMLParser):
 
         for index, line in enumerate(vSearchArea):
             vIndex = line.find(pElement, vSearchIndex)
-            print("index: "+str(vIndex))
             vSearchIndex = 0
             if vIndex >= 0:                
                 vLineNum = index
@@ -66,7 +80,7 @@ class OrgHTMLParser(HTMLParser):
 
         vCacheLocation = CacheLocation(vLineNum, vIndex)
         return vCacheLocation
-        
+
 class OrgTable:
     
     def __init__(self):
@@ -275,11 +289,11 @@ def replaceChar(pLine, pChar, pSubstitute):
     vResult = re.sub(re.escape(pChar), pSubstitute, pLine)
     return vResult
 
-def replaceTables(pHTML):
-    vCache = pHTML
+def replaceTables(pSource):
+    vCache = pSource
     
     zero = CacheLocation.getZeroCacheLocation()
-    vStartLocation = OrgHTMLParser.findTableStart(zero, pHTML)
+    vStartLocation = OrgHTMLParser.findTableStart(zero, pSource)
 
     while vStartLocation != CacheLocation.getNotFoundCacheLocation():
         vEndLocation = OrgHTMLParser.findTableEnd(vStartLocation, vCache)
@@ -309,6 +323,17 @@ def replaceTables(pHTML):
 
     return vCache
 
+def removeHeader(pSource):
+    vCacheLocationStart = OrgHTMLParser.findFirstDiv(pSource)
+    vCacheLocationEnd = OrgHTMLParser.findLastDiv(pSource)
+
+    vStart = vCacheLocationStart.getLineNum()
+    vEnd = vCacheLocationEnd.getLineNum()
+    
+    #Assuming this block uses full lines and there is only 1 div
+    vCache = pSource[vEnd+1:]
+    return vCache
+
 def org2ever(pSourceFile, pDestinationFile):
     None
     # vCache = cacheFile(pSourceFile)
@@ -317,8 +342,11 @@ def org2ever(pSourceFile, pDestinationFile):
 
 def ever2org(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
-    vCache = unescapeCharsFile(vCache, fEscapeChars)
+    vCache = removeHeader(vCache)
     vCache = replaceTables(vCache)
+    vCache = unescapeCharsFile(vCache, fEscapeChars)
+    vCache = replaceCharFile(vCache, "#", "*")
+    vCache = replaceCharFile(vCache, "1.", "****")
     writeFile(pDestinationFile, vCache)
 
 def cacheFile(pSourceFile):

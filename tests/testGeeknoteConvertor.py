@@ -284,6 +284,14 @@ class TestGeeknoteConvertor(unittest.TestCase):
 
         self.assertEqual(target, result)
 
+    def testCleanHTML(self):
+        source = ["<div kljsdlksjf","lksdfmlksdf", "</div>","</div>","This is the actual file"]
+        target = source[4:]
+
+        result = geeknoteConvertorLib.removeHeader(source)
+
+        self.assertEquals(result, target)
+
 
 # <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
