@@ -345,10 +345,9 @@ def removeEmptyLines(pSource):
     return pSource
 
 def org2ever(pSourceFile, pDestinationFile):
-    None
-    # vCache = cacheFile(pSourceFile)
-    # vCache =  escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
-    # writeFile(pDestinationFile, vCache)
+    vCache = cacheFile(pSourceFile)
+    vCache =  escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
+    writeFile(pDestinationFile, vCache)
 
 def ever2org(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
