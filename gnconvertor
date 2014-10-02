@@ -1,3 +1,4 @@
+#!/bin/python
 from geeknoteConvertor import geeknoteConvertorLib
 
 import os

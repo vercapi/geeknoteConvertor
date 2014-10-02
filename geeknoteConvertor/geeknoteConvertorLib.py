@@ -334,6 +334,16 @@ def removeHeader(pSource):
     vCache = pSource[vEnd+1:]
     return vCache
 
+def removeEmptyLines(pSource):
+    while(len(pSource) > 0):
+        vMatchEmptyLine = re.search("^[ ]*$", pSource[0])
+        if vMatchEmptyLine != None:
+            del pSource[0]
+        else:
+            break
+        
+    return pSource
+
 def org2ever(pSourceFile, pDestinationFile):
     None
     # vCache = cacheFile(pSourceFile)
@@ -342,11 +352,12 @@ def org2ever(pSourceFile, pDestinationFile):
 
 def ever2org(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
+    vCache = removeEmptyLines(vCache)
     vCache = removeHeader(vCache)
     vCache = replaceTables(vCache)
     vCache = unescapeCharsFile(vCache, fEscapeChars)
     vCache = replaceCharFile(vCache, "#", "*")
-    vCache = replaceCharFile(vCache, "1.", "****")
+    vCache = replaceCharFile(vCache, "1.", "****") 
     writeFile(pDestinationFile, vCache)
 
 def cacheFile(pSourceFile):

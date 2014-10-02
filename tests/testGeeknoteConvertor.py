@@ -290,7 +290,23 @@ class TestGeeknoteConvertor(unittest.TestCase):
 
         result = geeknoteConvertorLib.removeHeader(source)
 
-        self.assertEquals(result, target)
+        self.assertEqual(result, target)
+
+    def testRemoveEmptyLines(self):
+        source = ["\n","","     ","\n", " ", "First Line", ""]
+        target = ["First Line", ""]
+
+        result = geeknoteConvertorLib.removeEmptyLines(source)
+
+        self.assertEqual(result, target)
+
+    def testOnlyEmptyLines(self):
+        source = ["\n","","     ","\n", " ", "   \n", ""]
+        target = []
+
+        result = geeknoteConvertorLib.removeEmptyLines(source)
+
+        self.assertEqual(result, target)        
 
 
 # <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
