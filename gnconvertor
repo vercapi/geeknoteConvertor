@@ -3,13 +3,16 @@ from geeknoteConvertor import geeknoteConvertorLib
 
 import os
 import sys
+import codecs
+import time
 
 if len(sys.argv) >= 2:
     vOriginal = sys.argv[1]
     vTmp = sys.argv[1]+".org"
+    vMdTmp = sys.argv[1]+".md"
 
-    vSourceFile = open(vOriginal, "r")
-    vDestinationFile = open(vTmp, "w+")
+    vSourceFile = codecs.open(filename=vOriginal, mode="r", encoding="utf-8")
+    vDestinationFile = codecs.open(filename=vTmp, mode="w+", encoding="utf-8")
     try:
         geeknoteConvertorLib.ever2org(vSourceFile, vDestinationFile)
     finally:
@@ -18,8 +21,13 @@ if len(sys.argv) >= 2:
     
     os.system("emacsclient "+vTmp)
 
-    vSourceFile = open(vTmp, "r")
-    vDestinationFile = open(vOriginal, "w+")
+    # Wait for the file because the .md file is not generated exactly upon exit. It seems to be async
+    vTime = int(round(time.time() * 1000))
+    while(not os.path.isfile(vMdTmp) and vTime > int(round(time.time() * 1000))-10000):
+        None
+
+    vSourceFile = codecs.open(filename=vMdTmp, mode="r", encoding="utf-8")
+    vDestinationFile = codecs.open(filename=vOriginal, mode="w+", encoding="utf-8")
     try:
         geeknoteConvertorLib.org2ever(vSourceFile, vDestinationFile)
     finally:
