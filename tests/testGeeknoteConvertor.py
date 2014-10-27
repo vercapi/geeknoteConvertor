@@ -308,6 +308,22 @@ class TestGeeknoteConvertor(unittest.TestCase):
 
         self.assertEqual(result, target)        
 
+    def testENMLcleanOrgHTMLTable(self):
+        source = ["<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\" rules=\"groups\" frame=\"hsides\">"]
+        target = ["<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\" rules=\"groups\" >"]
+
+        result = geeknoteConvertorLib.HTMLToENML.removeHtmlAttribute(source, "frame")
+
+        self.assertEqual(result, target)
+
+    def testENMLcleanOrgHTMLTable2(self):
+        source = ["<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\" rules=\"groups\" frame=\"hsides\">"]
+        target = ["<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\"  frame=\"hsides\">"]
+
+        result = geeknoteConvertorLib.HTMLToENML.removeHtmlAttribute(source, "rules")
+
+        self.assertEqual(result, target)        
+
 
 # <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 

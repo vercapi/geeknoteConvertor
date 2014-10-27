@@ -2,6 +2,16 @@ import re
 from html.parser import HTMLParser
 from subprocess import call
 
+class HTMLToENML:
+
+    def removeHtmlAttribute(pSource, pAttribute):
+        vCache = list()
+        for line in pSource:
+            vReplacement = re.sub(pAttribute+'=[\'\"][^\'^\"]*[\'\"]', '', line)
+            vCache.append(vReplacement)
+
+        return vCache
+
 class OrgHTMLParser(HTMLParser):
 
     def __init__(self):
@@ -342,11 +352,15 @@ def removeEmptyLines(pSource):
         else:
             break
         
-    return pSource
+    return pSource    
 
 def org2ever(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
-    vCache =  escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
+    vCache = escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
+    vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='frame')
+    vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='rules')
+    vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='scope')
+    vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='class')
     writeFile(pDestinationFile, vCache)
 
 def ever2org(pSourceFile, pDestinationFile):
