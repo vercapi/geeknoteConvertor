@@ -31,25 +31,26 @@ Once finished just save and close the file.
 
 Open a shell
 
-'''
+```
 $ git clone https://github.com/vercapi/geeknoteConvertor.git
-'''
+```
 
 Next move to the new direcotry
 
-'''
+```
 $ cd geeknoteConvertor
-'''
+```
 
-'''
+```
 sudo python setup.py install
-'''
+```
 
 #### Integrate with emacs
 
 Add the following lines to your emacs startup system for instance your .emancs file
 
-'''
+
+```
 (defun close-org-hook ()
  (remove-hook 'kill-buffer-hook 'close-org-hook)
    (if (is-org-file)
@@ -69,12 +70,12 @@ Add the following lines to your emacs startup system for instance your .emancs f
      major-mode))
 
 (server-start)
-'''
+```
 
 ##### Configure geeknote
 
 In a shell
 
-'''
+```
 $ geeknote settings --editor gnconvertor
-'''
+```
