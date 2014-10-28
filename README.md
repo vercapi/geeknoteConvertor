@@ -13,14 +13,14 @@ open eshell (M-x eshell)
 
 in eshell issue the following commands
 
-'''
+```
 $ geeknote find schroot
 Total found: 4
   1 : 13.05.2012  Schroot - Debian Wiki
   2 : 13.05.2012  schroot - chroot for any userseshe
 
 $ geeknote edit 2
-'''
+```
 
 The file will open in emacs. You can edit it there.
 Once finished just save and close the file.
