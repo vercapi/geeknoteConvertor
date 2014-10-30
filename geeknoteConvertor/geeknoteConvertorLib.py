@@ -354,20 +354,49 @@ def removeEmptyLines(pSource):
         
     return pSource    
 
+def completeOrgTableNotation(pSource):
+    vCache = list()
+    for vLine in pSource:
+        vNewLine = ""
+
+        if vLine.find("|") >= 0:
+            vLeadingPipe = re.search("^\|.*", vLine)
+            if vLeadingPipe == None:
+                vNewLine = "|"+vLine
+            else:
+                vNewLine = vLine
+            
+            vTrailingPipe = re.search(".*\|$", vLine)
+            if vTrailingPipe == None:
+                vNewLine = vNewLine+"|"
+
+            vNewLine = vNewLine.replace("-|-", "-+-")
+        else:
+            vNewLine = vLine    
+                
+        vCache.append(vNewLine)
+
+    return vCache
+
 def org2ever(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
+    vCache = removeHeader(vCache)
+#    vCache = replaceCharFile(vCache, "*", "#")
+#    vCache = replaceCharFile(vCache, "****.", "1") 
     vCache = escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
     vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='frame')
     vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='rules')
     vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='scope')
     vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='class')
+    vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='id')
     writeFile(pDestinationFile, vCache)
 
 def ever2org(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
     vCache = removeEmptyLines(vCache)
-    vCache = removeHeader(vCache)
-    vCache = replaceTables(vCache)
+#    vCache = removeHeader(vCache)
+#    vCache = replaceTables(vCache)
+    vCache = completeOrgTableNotation(vCache)
     vCache = unescapeCharsFile(vCache, fEscapeChars)
     vCache = replaceCharFile(vCache, "#", "*")
     vCache = replaceCharFile(vCache, "1.", "****") 

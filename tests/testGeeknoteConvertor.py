@@ -324,9 +324,54 @@ class TestGeeknoteConvertor(unittest.TestCase):
 
         self.assertEqual(result, target)        
 
+    def testCompleteOrgTableNotation(self):
+        source = ["Command  |  Key  |  Description"]
+        target = ["|Command  |  Key  |  Description|"]
 
+        result = geeknoteConvertorLib.completeOrgTableNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testCompleteOrgTableNotationLeading(self):
+        source = ["|Command  |  Key  |  Description"]
+        target = ["|Command  |  Key  |  Description|"]
+
+        result = geeknoteConvertorLib.completeOrgTableNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testCompleteOrgTableNotationTrailing(self):
+        source = ["Command  |  Key  |  Description|"]
+        target = ["|Command  |  Key  |  Description|"]
+
+        result = geeknoteConvertorLib.completeOrgTableNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testCompleteOrgTableNotationBoth(self):
+        source = ["|Command  |  Key  |  Description|"]
+        target = ["|Command  |  Key  |  Description|"]
+
+        result = geeknoteConvertorLib.completeOrgTableNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testCompleteOrgTableNotationNoLine(self):
+        source = ["This is a normal line"]
+        target = ["This is a normal line"]
+
+        result = geeknoteConvertorLib.completeOrgTableNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testCompleteOrgTableNotationNoLine(self):
+        source = ["---|---|---"]
+        target = ["|---+---+---|"]
+
+        result = geeknoteConvertorLib.completeOrgTableNotation(source)
+
+        self.assertEqual(result, target)
 # <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
 
 # <colgroup>
 # <col  class="right" />
