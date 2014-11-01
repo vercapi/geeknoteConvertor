@@ -371,35 +371,36 @@ class TestGeeknoteConvertor(unittest.TestCase):
         result = geeknoteConvertorLib.completeOrgTableNotation(source)
 
         self.assertEqual(result, target)
-# <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-# <colgroup>
-# <col  class="right" />
-
-# <col  class="left" />
-
-# <col  class="left" />
-# </colgroup>
-# <thead>
-# <tr>
-# <th scope="col" class="right">id</th>
-# <th scope="col" class="left">name</th>
-# <th scope="col" class="left">description</th>
-# </tr>
-# </thead>
-
-# <tbody>
-# <tr>
-# <td class="right">1</td>
-# <td class="left">Page one</td>
-# <td class="left">This is some longer text</td>
-# </tr>
 
 
-# <tr>
-# <td class="right">2</td>
-# <td class="left">Other thing</td>
-# <td class="left">This is awesome</td>
-# </tr>
-# </tbody>
-# </table>
+    def testConvertToOrgLinkNotation(self):
+        source = ["[[www.google.be][Search]]"]
+        target = ["[Search](www.google.be)"]
+
+        result = geeknoteConvertorLib.convertToOrgLinkNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testConvertToOrgLinkNotationInText(self):
+        source = ["Here is some text and this is [[www.google.be][Search]] a link"]
+        target = ["Here is some text and this is [Search](www.google.be) a link"]
+
+        result = geeknoteConvertorLib.convertToOrgLinkNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testConvertToOrgLinkNotationDoubleInText(self):
+        source = ["Here is some [[www.emacs.org][emacs]] text and this is [[www.google.be][Search]] a link"]
+        target = ["Here is some [emacs](www.emacs.org) text and this is [Search](www.google.be) a link"]
+
+        result = geeknoteConvertorLib.convertToOrgLinkNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testConvertToOrgLinkNotationInTextNoLink(self):
+        source = ["Here is some text and this is [[www.google.be][Search]] a link", "no link"]
+        target = ["Here is some text and this is [Search](www.google.be) a link", "no link"]
+
+        result = geeknoteConvertorLib.convertToOrgLinkNotation(source)
+
+        self.assertEqual(result, target)

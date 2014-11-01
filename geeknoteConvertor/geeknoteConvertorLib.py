@@ -378,6 +378,35 @@ def completeOrgTableNotation(pSource):
 
     return vCache
 
+def convertToOrgLinkNotation(pSource):
+    vCache = list()
+    for vLine in pSource:
+        vNewLine = ""
+        vReplaced = False
+
+        vNewLine = vLine
+        while True:
+            vBegin = vNewLine.find("[[")
+            vEnd =  vNewLine.find("]]")
+            if vBegin < 0 or vEnd < 0:
+                break
+
+            vLinkResult = re.search("\[\[([^\]]*)\]\[([^\]]*)\]\]", vNewLine)
+            vLink = vLinkResult.group(1)
+            vLinkName = vLinkResult.group(2)
+
+            vNewLink = "["+vLinkName+"]("+vLink+")"
+            vNewLine = vNewLine.replace(vLinkResult.group(0), vNewLink)
+            
+        vCache.append(vNewLine)
+        vReplaced = True
+            
+        if not vReplaced:
+            vCache.append(vLine)
+
+    return vCache
+            
+
 def org2ever(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
     vCache = removeHeader(vCache)
