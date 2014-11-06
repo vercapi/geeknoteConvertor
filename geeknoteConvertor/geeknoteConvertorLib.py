@@ -119,7 +119,6 @@ class OrgParser:
 
     def parse(pTableCache):
         vOrgTtable = OrgTable()
-
         OrgParser.__parseHeader(pTableCache[0], vOrgTtable)
         for vIdx, vItem in enumerate(pTableCache[2:]):
             OrgParser.__parseColumns(vItem, vIdx+1, vOrgTtable)
@@ -149,6 +148,12 @@ class OrgTable:
     def __init__(self):
         self.__rows = []
 
+    @classmethod
+    def constructFromTable(cls, pTable):
+        vOrgTable = cls()
+        vOrgTable.__rows = pTable
+        return vOrgTable
+        
     def addHeader(self, pColIdx, pContent):
         vRow = self.__addRow(0)
         vCol = OrgTable.__addColumn(vRow, pColIdx)

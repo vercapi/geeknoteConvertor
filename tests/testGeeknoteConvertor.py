@@ -486,4 +486,19 @@ class TestGeeknoteConvertor(unittest.TestCase):
         self.assertEqual(result.getColumnContent(2,1), "Content Z")
         self.assertEqual(result.getColumnContent(2,2), "2Content Z")
 
-        
+    def testOrgTableFromTabe(self):
+        vTable = [["h"+str(i) for i in range(4)], ["c1"+str(i) for i in range(4)], ["c2"+str(i) for i in range(4)]]
+
+        vOrgTable = geeknoteConvertorLib.OrgTable.constructFromTable(vTable)
+
+        self.assertEqual(vOrgTable.getCols(0), 4)
+        self.assertEqual(vOrgTable.getRows(), 3)
+        self.assertEqual(vOrgTable.getColumnContent(0,0), "h0")
+        self.assertEqual(vOrgTable.getColumnContent(1,0), "h1")
+        self.assertEqual(vOrgTable.getColumnContent(2,0), "h2")
+        self.assertEqual(vOrgTable.getColumnContent(0,1), "c10")
+        self.assertEqual(vOrgTable.getColumnContent(1,1), "c11")
+        self.assertEqual(vOrgTable.getColumnContent(2,1), "c12")
+        self.assertEqual(vOrgTable.getColumnContent(0,2), "c20")
+        self.assertEqual(vOrgTable.getColumnContent(1,2), "c21")
+        self.assertEqual(vOrgTable.getColumnContent(2,2), "c22")
