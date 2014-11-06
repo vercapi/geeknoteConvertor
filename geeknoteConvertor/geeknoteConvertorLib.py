@@ -1,6 +1,5 @@
 import re
 from html.parser import HTMLParser
-from subprocess import call
 
 class HTMLToENML:
 
@@ -91,6 +90,60 @@ class OrgHTMLParser(HTMLParser):
         vCacheLocation = CacheLocation(vLineNum, vIndex)
         return vCacheLocation
 
+class OrgParser:
+
+    def identifyOrgTable(pSource, pCacheLocationStart):
+        vStartIdx = pCacheLocationStart.getLineNum()
+        vSearchArea = pSource[pCacheLocationStart.getLineNum():]
+        
+        vStart = None
+        vEnd = None
+        vLineIdx = 0
+        for vLine in vSearchArea:
+            vTableStart = re.search("^\|.*\|$", vLine)
+            if vTableStart != None:
+                vStart = CacheLocation(vLineIdx+vStartIdx, vTableStart.start())
+                break
+            
+            vLineIdx += 1
+
+        for vLine in vSearchArea[vLineIdx+1:]:
+            vTableEnd = re.search("^\|.*\|$", vLine)
+            if vTableEnd == None:
+                vEnd = CacheLocation(vLineIdx+vStartIdx, re.search("\|$", vSearchArea[vLineIdx]).start())
+                break
+            
+            vLineIdx += 1
+        
+        return (vStart, vEnd)
+
+    def parse(pTableCache):
+        vOrgTtable = OrgTable()
+
+        OrgParser.__parseHeader(pTableCache[0], vOrgTtable)
+        for vIdx, vItem in enumerate(pTableCache[2:]):
+            OrgParser.__parseColumns(vItem, vIdx+1, vOrgTtable)
+
+        return vOrgTtable
+
+    def __prepareLine(pLine):
+         vCols = [item.strip() for item in pLine.split("|")]
+         vCols = vCols[1:-1]
+
+         return vCols
+
+    def __parseHeader(pLine, pOrgTable):
+        vCols = OrgParser.__prepareLine(pLine)
+
+        for vIdx, vItem in enumerate(vCols):
+            pOrgTable.addHeader(vIdx, vItem)
+
+    def __parseColumns(pLine, pRowIdx, pOrgTable):
+        vCols = OrgParser.__prepareLine(pLine)
+        
+        for vIdx, vItem in enumerate(vCols):
+            pOrgTable.addColumn(vIdx, pRowIdx, vItem)
+            
 class OrgTable:
     
     def __init__(self):
@@ -183,6 +236,11 @@ class OrgWriter:
         vContent = self.__orgTable.getColumnContent(pColIdx, pRowIdx)
         return " "+vContent.ljust(vSize+1)+"|"
 
+class HTMLWriter:
+
+    def __init__(self, pOrgTable):
+        self.__orgTable = pOrgTable
+    
 
 class CacheLocation(object):
 
@@ -400,24 +458,65 @@ def convertToOrgLinkNotation(pSource):
             
         vCache.append(vNewLine)
         vReplaced = True
-            
         if not vReplaced:
             vCache.append(vLine)
 
     return vCache
             
+def convertToEvernoteLinkNotation(pSource):
+    vCache = list()
+    for vLine in pSource:
+        vNewLine = ""
+        vReplaced = False
+
+        vNewLine = vLine
+        while True:
+            vLinkResult = re.search("\[([^\]]*)\]\(([^\)]*)\)", vNewLine)
+            if vLinkResult == None:
+                break
+            vLinkName = vLinkResult.group(1)
+            vLink = vLinkResult.group(2)
+
+            vNewLink = "[["+vLink+"]["+vLinkName+"]]"
+            vNewLine = vNewLine.replace(vLinkResult.group(0), vNewLink)
+
+        vCache.append(vNewLine)
+        vReplaced = True
+        
+        if not vReplaced:
+            vCache.append(vLine)
+
+    return vCache
+
+def convertToGeeknoteTable(pSource):
+    vCache = list()
+    for vLine in pSource:
+
+        vNewLine = re.sub('^\|', '', vLine)
+        vNewLine = re.sub('\|$', '', vNewLine)
+
+        vHeaderResult =  re.search("(-*\+-*)+", vNewLine)
+        if vHeaderResult != None:
+            vNewLine = vNewLine.replace("+", "|")
+            vNewLine = re.sub(r'\-*(\|*)', r'---\1', vNewLine)
+        
+        vCache.append(vNewLine.strip())
+
+    return vCache
 
 def org2ever(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
     vCache = removeHeader(vCache)
-#    vCache = replaceCharFile(vCache, "*", "#")
-#    vCache = replaceCharFile(vCache, "****.", "1") 
+    vCache = replaceCharFile(vCache, "*", "#")
+    vCache = replaceCharFile(vCache, "****.", "1") 
     vCache = escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
-    vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='frame')
-    vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='rules')
-    vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='scope')
-    vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='class')
-    vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='id')
+    # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='frame')
+    # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='rules')
+    # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='scope')
+    # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='class')
+    # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='id')
+    vCache = convertToEvernoteLinkNotation(pSource=vCache)
+    vCache = convertToGeeknoteTable(pSource=vCache)
     writeFile(pDestinationFile, vCache)
 
 def ever2org(pSourceFile, pDestinationFile):
@@ -428,7 +527,8 @@ def ever2org(pSourceFile, pDestinationFile):
     vCache = completeOrgTableNotation(vCache)
     vCache = unescapeCharsFile(vCache, fEscapeChars)
     vCache = replaceCharFile(vCache, "#", "*")
-    vCache = replaceCharFile(vCache, "1.", "****") 
+    vCache = replaceCharFile(vCache, "1.", "****")
+    vCache = convertToOrgLinkNotation(pSource=vCache)
     writeFile(pDestinationFile, vCache)
 
 def cacheFile(pSourceFile):

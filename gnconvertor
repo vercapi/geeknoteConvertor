@@ -26,7 +26,7 @@ if len(sys.argv) >= 2:
     while(not os.path.isfile(vMdTmp) and vTime > int(round(time.time() * 1000))-10000):
         None
 
-    vSourceFile = codecs.open(filename=vMdTmp, mode="r", encoding="utf-8")
+    vSourceFile = codecs.open(filename=vTmp, mode="r", encoding="utf-8")
     vDestinationFile = codecs.open(filename=vOriginal, mode="w+", encoding="utf-8")
     try:
         geeknoteConvertorLib.org2ever(vSourceFile, vDestinationFile)

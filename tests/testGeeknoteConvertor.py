@@ -364,7 +364,7 @@ class TestGeeknoteConvertor(unittest.TestCase):
 
         self.assertEqual(result, target)
 
-    def testCompleteOrgTableNotationNoLine(self):
+    def testCompleteOrgTableNotationHeader(self):
         source = ["---|---|---"]
         target = ["|---+---+---|"]
 
@@ -404,3 +404,86 @@ class TestGeeknoteConvertor(unittest.TestCase):
         result = geeknoteConvertorLib.convertToOrgLinkNotation(source)
 
         self.assertEqual(result, target)
+
+    def testConvertToEvernoteLinkNotation(self):
+        source = ["[Search](www.google.be)"]
+        target = ["[[www.google.be][Search]]"]
+
+        result = geeknoteConvertorLib.convertToEvernoteLinkNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testConvertToEvernoteLinkNotationInText(self):
+        source = ["Here is some text and this is [Search](www.google.be) a link"]
+        target = ["Here is some text and this is [[www.google.be][Search]] a link"]
+
+        result = geeknoteConvertorLib.convertToEvernoteLinkNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testConvertToEvernoteLinkNotationDoubleInText(self):
+        source = ["Here is some [emacs](www.emacs.org) text and this is [Search](www.google.be) a link"]
+        target = ["Here is some [[www.emacs.org][emacs]] text and this is [[www.google.be][Search]] a link"]
+
+        result = geeknoteConvertorLib.convertToEvernoteLinkNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testConvertToEvernoteLinkNotationInTextNoLink(self):
+        source = ["Here is some text and this is [Search](www.google.be) a link", "no link"]
+        target = ["Here is some text and this is [[www.google.be][Search]] a link", "no link"]
+
+        result = geeknoteConvertorLib.convertToEvernoteLinkNotation(source)
+
+        self.assertEqual(result, target)
+
+    def testConvertToGeeknoteTable(self):
+        source = ["| Title | test | last |"]
+        target = ["Title | test | last"]
+
+        result = geeknoteConvertorLib.convertToGeeknoteTable(source)
+
+        self.assertEqual(result, target)
+
+    def testConvertToGeeknoteTableHeader(self):
+        source = ["|------+----+------|"]
+        target = ["---|---|---"]
+
+        result = geeknoteConvertorLib.convertToGeeknoteTable(source)
+
+        self.assertEqual(result, target)
+
+    def testOrgParserIdentifyOrgTables(self):
+        source = ["some text sdfsdf", "| Header | X | Header Z |", "|------+----+------|", "| Content | 1 | Content Z |", "Some other text"]
+        target = (geeknoteConvertorLib.CacheLocation(1,0), geeknoteConvertorLib.CacheLocation(3,26))
+
+        result = geeknoteConvertorLib.OrgParser.identifyOrgTable(source, geeknoteConvertorLib.CacheLocation.getZeroCacheLocation())
+
+        self.assertEqual(result, target)
+
+    def testOrgParserIdentifyOrgTablesNext(self):
+        source = ["some text sdfsdf", "| Header | X | Header Z |", "|------+----+------|", "| Content | 1 | Content Z |", "Some other text"]
+        target = (geeknoteConvertorLib.CacheLocation(1,0), geeknoteConvertorLib.CacheLocation(3,26))
+
+        result = geeknoteConvertorLib.OrgParser.identifyOrgTable(source, geeknoteConvertorLib.CacheLocation(1,0))
+
+        self.assertEqual(result, target)
+
+    def testParseOrgTable(self):
+        source = ["| Header | X | Header Z |", "|------+----+------|", "| Content | 1 | Content Z |", "| 2Content | 21 | 2Content Z |"]
+
+        result = geeknoteConvertorLib.OrgParser.parse(source)
+
+        self.assertEqual(result.getCols(0), 3)
+        self.assertEqual(result.getRows(), 3)
+        self.assertEqual(result.getColumnContent(0,0), "Header")
+        self.assertEqual(result.getColumnContent(0,1), "Content")
+        self.assertEqual(result.getColumnContent(0,2), "2Content")
+        self.assertEqual(result.getColumnContent(1,0), "X")
+        self.assertEqual(result.getColumnContent(1,1), "1")
+        self.assertEqual(result.getColumnContent(1,2), "21")
+        self.assertEqual(result.getColumnContent(2,0), "Header Z")
+        self.assertEqual(result.getColumnContent(2,1), "Content Z")
+        self.assertEqual(result.getColumnContent(2,2), "2Content Z")
+
+        
