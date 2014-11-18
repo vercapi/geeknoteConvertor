@@ -502,3 +502,20 @@ class TestGeeknoteConvertor(unittest.TestCase):
         self.assertEqual(vOrgTable.getColumnContent(0,2), "c20")
         self.assertEqual(vOrgTable.getColumnContent(1,2), "c21")
         self.assertEqual(vOrgTable.getColumnContent(2,2), "c22")
+
+    def testWriteHtmlTable(self):
+        vTable = [["h"+str(i) for i in range(4)], ["c1"+str(i) for i in range(4)], ["c2"+str(i) for i in range(4)]]
+
+        vOrgTable = geeknoteConvertorLib.OrgTable.constructFromTable(vTable)
+        vHTMLWriter = geeknoteConvertorLib.HTMLWriter(vOrgTable)
+        vResult = vHTMLWriter.parseHTML()
+
+        print(vResult)
+
+        vTarget = ["<TABLE>"
+                   ,"<TR><TH>h0</TH><TH>h1</TH><TH>h2</TH><TH>h3</TH></TR>"
+                   ,"<TR><TD>c10</TD><TD>c11</TD><TD>c12</TD><TD>c13</TD></TR>"
+                   ,"<TR><TD>c20</TD><TD>c21</TD><TD>c22</TD><TD>c23</TD></TR>"
+                   ,"</TABLE>"]
+
+        self.assertEqual(vResult, vTarget)

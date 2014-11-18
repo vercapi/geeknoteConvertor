@@ -243,10 +243,80 @@ class OrgWriter:
 
 class HTMLWriter:
 
+    TABLE_TAG = "TABLE"
+    TR_TAG = "TR"
+    TH_TAG = "TH"
+    TD_TAG = "TD"
+
     def __init__(self, pOrgTable):
         self.__orgTable = pOrgTable
-    
+        self.__cache = list()
+        self.__currentLine = None
 
+    def parseHTML(self):
+        self.__openTable()
+        self.__addHeaderRow()
+        if(self.__orgTable.getRows() > 0):
+            self.__addRows()
+        self.__closeTable()
+        
+        return self.__cache
+
+    def __openTable(self):
+        self.__newLine()
+        self.__openTag(HTMLWriter.TABLE_TAG)
+
+    def __closeTable(self):
+        self.__newLine()
+        self.__closeTag(HTMLWriter.TABLE_TAG)
+        self.__newLine()
+
+    def __addHeaderRow(self):
+        self.__newLine()
+        self.__openTag(HTMLWriter.TR_TAG)
+
+        vNumOfHeaders = self.__orgTable.getCols(0)
+        for vColIdx in range(vNumOfHeaders):
+            self.__addHeader(self.__orgTable.getColumnContent(vColIdx, 0))
+            
+        self.__closeTag(HTMLWriter.TR_TAG)
+
+    def __addRows(self):
+        for vRowIdx in range(self.__orgTable.getRows()-1):
+            self.__newLine()
+            self.__addRow(vRowIdx+1)
+
+    def __addRow(self, pRowNum):
+        self.__openTag(HTMLWriter.TR_TAG)
+
+        for vColIdx in range(self.__orgTable.getCols(pRowNum)):
+            self.__addCell(self.__orgTable.getColumnContent(vColIdx, pRowNum))
+        
+        self.__closeTag(HTMLWriter.TR_TAG)
+
+    def __addHeader(self, pContent):
+        self.__addElement(HTMLWriter.TH_TAG, pContent)
+
+    def __addCell(self, pContent):
+        self.__addElement(HTMLWriter.TD_TAG, pContent)
+        
+    def __addElement(self, pTagName, pContent):
+        self.__openTag(pTagName)
+        self.__currentLine += pContent
+        self.__closeTag(pTagName)
+    
+    def __openTag(self, pTagName):
+        self.__currentLine += "<"+pTagName+">"
+
+    def __closeTag(self, pTagName):
+        self.__currentLine += "</"+pTagName+">"
+
+    def __newLine(self):
+        if self.__currentLine and len(self.__currentLine.strip()) > 0:
+            self.__cache.append(self.__currentLine)
+
+        self.__currentLine = "";
+    
 class CacheLocation(object):
 
     def __init__(self, pLineNum, pIndex):
