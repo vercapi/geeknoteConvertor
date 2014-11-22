@@ -561,6 +561,7 @@ def convertToEvernoteLinkNotation(pSource):
 
             vNewLink = "[["+vLink+"]["+vLinkName+"]]"
             vNewLine = vNewLine.replace(vLinkResult.group(0), vNewLink)
+            vNewLine = vNewLine.replace('\\', '')
 
         vCache.append(vNewLine)
         vReplaced = True
@@ -627,7 +628,6 @@ def translateOrgToHTMLTables(pCache):
     vCacheRange = OrgParser.identifyOrgTable(vNewCache, CacheLocation.getZeroCacheLocation())
     while(vCacheRange.start != None and vCacheRange.start > CacheLocation.getZeroCacheLocation()):
         vOrgTablePart = getCacheLocation(vNewCache, vCacheRange.start, vCacheRange.end)
-        print('ORG CACHE: '+str(vOrgTablePart))
         vOrgTable = OrgParser.parse(vOrgTablePart)
         vHTMLWriter = HTMLWriter(vOrgTable)
         vCache = vHTMLWriter.parseHTML()
@@ -647,8 +647,7 @@ def translateOrgToHTMLTables(pCache):
 def org2ever(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
     vCache = removeHeader(vCache)
-    vCache = replaceCharFile(vCache, "*", "#")
-    vCache = replaceCharFile(vCache, "****.", "1") 
+    #vCache = replaceCharFile(vCache, "****.", "1") 
     vCache = escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='frame')
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='rules')
@@ -657,6 +656,7 @@ def org2ever(pSourceFile, pDestinationFile):
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='id')
     vCache = convertToEvernoteLinkNotation(pSource=vCache)
     vCache =  translateOrgToHTMLTables(pCache = vCache)
+#    vCache = escapeChars(vCache, "*", "\\*")
     #vCache = convertToGeeknoteTable(pSource=vCache)
     writeFile(pDestinationFile, vCache)
 
@@ -667,8 +667,8 @@ def ever2org(pSourceFile, pDestinationFile):
 #    vCache = replaceTables(vCache)
     vCache = completeOrgTableNotation(vCache)
     vCache = unescapeCharsFile(vCache, fEscapeChars)
-    vCache = replaceCharFile(vCache, "#", "*")
-    vCache = replaceCharFile(vCache, "1.", "****")
+ #   vCache = replaceCharFile(vCache, "#", "*")
+ #   vCache = replaceCharFile(vCache, "1.", "****")
     vCache = convertToOrgLinkNotation(pSource=vCache)
     writeFile(pDestinationFile, vCache)
     
