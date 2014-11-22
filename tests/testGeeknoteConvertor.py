@@ -634,7 +634,7 @@ class TestGeeknoteConvertor(unittest.TestCase):
                    ,"Hellosdlsf. End."
         ]
 
-        self.assertEqual(vResult, vTarget)ekn
+        self.assertEqual(vResult, vTarget)
 
     def testFullConversionToGeeknote(self):
         vSourceFile = codecs.open(filename="./resources/test.org", mode="r", encoding="utf-8")

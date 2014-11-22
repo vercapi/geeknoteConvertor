@@ -386,7 +386,7 @@ class CacheLocation(object):
         return str(self.__class__)+" -> "+"index: "+str(self.__index)+", lineNum:"+str(self.__lineNum)
 
 # Characters to escape
-fEscapeChars = ["_", "[", "]", "*"]
+fEscapeChars = ["_", "*"]
 
 """
 Open a file with name pFileName
@@ -535,7 +535,7 @@ def convertToOrgLinkNotation(pSource):
             vLink = vLinkResult.group(1)
             vLinkName = vLinkResult.group(2)
 
-            vNewLink = "["+vLinkName+"]("+vLink+")"
+            vNewLink = "[["+vLink+"]["+vLinkName+"]]"
             vNewLine = vNewLine.replace(vLinkResult.group(0), vNewLink)
             
         vCache.append(vNewLine)
@@ -552,14 +552,15 @@ def convertToEvernoteLinkNotation(pSource):
         vReplaced = False
 
         vNewLine = vLine
+        print('LINE: '+vLine)
         while True:
-            vLinkResult = re.search("\[([^\]]*)\]\(([^\)]*)\)", vNewLine)
+            vLinkResult = re.search('\[\[([^\]]*)\]\[(([^\)]*))\]\]', vNewLine)
             if vLinkResult == None:
                 break
-            vLinkName = vLinkResult.group(1)
-            vLink = vLinkResult.group(2)
+            vLink = vLinkResult.group(1)
+            vLinkName = vLinkResult.group(2)
 
-            vNewLink = "[["+vLink+"]["+vLinkName+"]]"
+            vNewLink = "["+vLinkName+"]("+vLink+")"
             vNewLine = vNewLine.replace(vLinkResult.group(0), vNewLink)
             vNewLine = vNewLine.replace('\\', '')
 
@@ -646,15 +647,15 @@ def translateOrgToHTMLTables(pCache):
 
 def org2ever(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
-    vCache = removeHeader(vCache)
-    #vCache = replaceCharFile(vCache, "****.", "1") 
+    #vCache = removeHeader(vCache)
+    #vCache = replaceCharFile(vCache, "****.", "1")
+    vCache = convertToEvernoteLinkNotation(pSource=vCache)
     vCache = escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='frame')
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='rules')
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='scope')
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='class')
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='id')
-    vCache = convertToEvernoteLinkNotation(pSource=vCache)
     vCache =  translateOrgToHTMLTables(pCache = vCache)
 #    vCache = escapeChars(vCache, "*", "\\*")
     #vCache = convertToGeeknoteTable(pSource=vCache)
