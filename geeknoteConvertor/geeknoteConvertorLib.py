@@ -1,5 +1,7 @@
 import re
 from html.parser import HTMLParser
+from collections import namedtuple
+
 
 class HTMLToENML:
 
@@ -100,6 +102,7 @@ class OrgParser:
         vEnd = None
         vLineIdx = 0
         for vLine in vSearchArea:
+            vLine = vLine.strip()
             vTableStart = re.search("^\|.*\|$", vLine)
             if vTableStart != None:
                 vStart = CacheLocation(vLineIdx+vStartIdx, vTableStart.start())
@@ -108,14 +111,16 @@ class OrgParser:
             vLineIdx += 1
 
         for vLine in vSearchArea[vLineIdx+1:]:
+            vLine = vLine.strip()
             vTableEnd = re.search("^\|.*\|$", vLine)
             if vTableEnd == None:
-                vEnd = CacheLocation(vLineIdx+vStartIdx, re.search("\|$", vSearchArea[vLineIdx]).start())
+                vEnd = CacheLocation(vLineIdx+vStartIdx, re.search("\|$", vSearchArea[vLineIdx].strip()).start()+1)
                 break
             
             vLineIdx += 1
-        
-        return (vStart, vEnd)
+
+            
+        return CacheLocation.CacheRange(vStart, vEnd)
 
     def parse(pTableCache):
         vOrgTtable = OrgTable()
@@ -319,6 +324,8 @@ class HTMLWriter:
     
 class CacheLocation(object):
 
+    CacheRange = namedtuple('CacheRange', 'start end')
+    
     def __init__(self, pLineNum, pIndex):
         self.__lineNum = pLineNum
         self.__index = pIndex
@@ -579,6 +586,64 @@ def convertToGeeknoteTable(pSource):
 
     return vCache
 
+
+def getCacheLocation(pCache, pCacheLocationStart, pCacheLocationEnd):
+    vFirstLine = pCacheLocationStart.getLineNum()
+    vLastLine = pCacheLocationEnd.getLineNum()
+
+    vIndexFirstLine = pCacheLocationStart.getIndex()
+    vIndexLastLine = pCacheLocationEnd.getIndex()
+    
+    vLines = pCache[vFirstLine:vLastLine+1]
+    vLines[0] = vLines[0][vIndexFirstLine:]
+    vLines[-1] = vLines[-1][:vIndexLastLine]
+
+    return vLines
+
+def replaceCacheLocation(pCache, pCacheLocationStart, pCacheLocationEnd, pReplacement):
+    vFirstLine = pCacheLocationStart.getLineNum()
+    vLastLine = pCacheLocationEnd.getLineNum()
+
+    vIndexFirstLine = pCacheLocationStart.getIndex()
+    vIndexLastLine = pCacheLocationEnd.getIndex()
+
+    vCache = pCache
+    vCache[vFirstLine] = vCache[vFirstLine][:vIndexFirstLine] + pReplacement[0]
+    vCache[vLastLine] = pReplacement[-1] + vCache[vLastLine][vIndexLastLine:]
+
+    vCacheTmp = vCache[:vFirstLine+1]
+    vCacheTmp += vCache[vLastLine:]
+    vCache = vCacheTmp
+
+    vRestReplacement = pReplacement[1:-1]
+    for vLineIdx in range(len(vRestReplacement)):
+        vCache.insert(vFirstLine+vLineIdx+1, vRestReplacement[vLineIdx])
+
+    return vCache
+
+
+def translateOrgToHTMLTables(pCache):
+    vNewCache = pCache
+    vCacheRange = OrgParser.identifyOrgTable(vNewCache, CacheLocation.getZeroCacheLocation())
+    while(vCacheRange.start != None and vCacheRange.start > CacheLocation.getZeroCacheLocation()):
+        vOrgTablePart = getCacheLocation(vNewCache, vCacheRange.start, vCacheRange.end)
+        print('ORG CACHE: '+str(vOrgTablePart))
+        vOrgTable = OrgParser.parse(vOrgTablePart)
+        vHTMLWriter = HTMLWriter(vOrgTable)
+        vCache = vHTMLWriter.parseHTML()
+        vNewCache = replaceCacheLocation(vNewCache, vCacheRange.start, vCacheRange.end, vCache)
+
+        vOriginalLines = vCacheRange.end.getLineNum() - vCacheRange.start.getLineNum()
+        vNewLines = len(vCache)
+        vDifference = vNewLines - vOriginalLines        
+
+        vCacheLocationEnd = CacheLocation(vCacheRange.end.getLineNum()+vDifference, vCacheRange.end.getIndex())
+        vCacheRange = OrgParser.identifyOrgTable(vNewCache, vCacheLocationEnd)
+
+
+    return vNewCache
+
+
 def org2ever(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
     vCache = removeHeader(vCache)
@@ -591,7 +656,8 @@ def org2ever(pSourceFile, pDestinationFile):
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='class')
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='id')
     vCache = convertToEvernoteLinkNotation(pSource=vCache)
-    vCache = convertToGeeknoteTable(pSource=vCache)
+    vCache =  translateOrgToHTMLTables(pCache = vCache)
+    #vCache = convertToGeeknoteTable(pSource=vCache)
     writeFile(pDestinationFile, vCache)
 
 def ever2org(pSourceFile, pDestinationFile):
@@ -605,7 +671,7 @@ def ever2org(pSourceFile, pDestinationFile):
     vCache = replaceCharFile(vCache, "1.", "****")
     vCache = convertToOrgLinkNotation(pSource=vCache)
     writeFile(pDestinationFile, vCache)
-
+    
 def cacheFile(pSourceFile):
     vCache = list()
     for line in pSourceFile:

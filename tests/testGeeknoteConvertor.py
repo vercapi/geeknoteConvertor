@@ -1,4 +1,6 @@
 import sys
+import os
+import codecs
 sys.path.append("../geeknoteConvertor")
 
 import geeknoteConvertorLib
@@ -455,7 +457,31 @@ class TestGeeknoteConvertor(unittest.TestCase):
 
     def testOrgParserIdentifyOrgTables(self):
         source = ["some text sdfsdf", "| Header | X | Header Z |", "|------+----+------|", "| Content | 1 | Content Z |", "Some other text"]
-        target = (geeknoteConvertorLib.CacheLocation(1,0), geeknoteConvertorLib.CacheLocation(3,26))
+        target = (geeknoteConvertorLib.CacheLocation(1,0), geeknoteConvertorLib.CacheLocation(3,27))
+
+        result = geeknoteConvertorLib.OrgParser.identifyOrgTable(source, geeknoteConvertorLib.CacheLocation.getZeroCacheLocation())
+
+        self.assertEqual(result, target)
+
+    def testOrgParserIdentifyOrgTables2cols(self):
+        source = ["some text sdfsdf", "| Header | X |", "|------+----|", "| Content | 1 |", "Some other text"]
+        target = (geeknoteConvertorLib.CacheLocation(1,0), geeknoteConvertorLib.CacheLocation(3,15))
+
+        result = geeknoteConvertorLib.OrgParser.identifyOrgTable(source, geeknoteConvertorLib.CacheLocation.getZeroCacheLocation())
+
+        self.assertEqual(result, target)
+
+    def testOrgParserIdentifyOrgTablesTrailingSpaces(self):
+        source = ["some text sdfsdf", "| Header | X |  ", "|------+----|", "| Content | 1 |", "Some other text"]
+        target = (geeknoteConvertorLib.CacheLocation(1,0), geeknoteConvertorLib.CacheLocation(3,15))
+
+        result = geeknoteConvertorLib.OrgParser.identifyOrgTable(source, geeknoteConvertorLib.CacheLocation.getZeroCacheLocation())
+
+        self.assertEqual(result, target)
+
+    def testOrgParserIdentifyOrgTables3rows(self):
+        source = ["some text sdfsdf", "| Header | X |", "|------+----|", "| Content | 1 |", "| Third | 2 |", "Some other text"]
+        target = (geeknoteConvertorLib.CacheLocation(1,0), geeknoteConvertorLib.CacheLocation(4,13))
 
         result = geeknoteConvertorLib.OrgParser.identifyOrgTable(source, geeknoteConvertorLib.CacheLocation.getZeroCacheLocation())
 
@@ -463,7 +489,7 @@ class TestGeeknoteConvertor(unittest.TestCase):
 
     def testOrgParserIdentifyOrgTablesNext(self):
         source = ["some text sdfsdf", "| Header | X | Header Z |", "|------+----+------|", "| Content | 1 | Content Z |", "Some other text"]
-        target = (geeknoteConvertorLib.CacheLocation(1,0), geeknoteConvertorLib.CacheLocation(3,26))
+        target = (geeknoteConvertorLib.CacheLocation(1,0), geeknoteConvertorLib.CacheLocation(3,27))
 
         result = geeknoteConvertorLib.OrgParser.identifyOrgTable(source, geeknoteConvertorLib.CacheLocation(1,0))
 
@@ -486,6 +512,20 @@ class TestGeeknoteConvertor(unittest.TestCase):
         self.assertEqual(result.getColumnContent(2,1), "Content Z")
         self.assertEqual(result.getColumnContent(2,2), "2Content Z")
 
+    def testParseOrgTable2Cols(self):
+        source = ["| Header | X |", "|------+-----|", "| Content | 1 |", "| 2Content | 21 |"]
+
+        result = geeknoteConvertorLib.OrgParser.parse(source)
+
+        self.assertEqual(result.getCols(0), 2)
+        self.assertEqual(result.getRows(), 3)
+        self.assertEqual(result.getColumnContent(0,0), "Header")
+        self.assertEqual(result.getColumnContent(0,1), "Content")
+        self.assertEqual(result.getColumnContent(0,2), "2Content")
+        self.assertEqual(result.getColumnContent(1,0), "X")
+        self.assertEqual(result.getColumnContent(1,1), "1")
+        self.assertEqual(result.getColumnContent(1,2), "21")
+        
     def testOrgTableFromTabe(self):
         vTable = [["h"+str(i) for i in range(4)], ["c1"+str(i) for i in range(4)], ["c2"+str(i) for i in range(4)]]
 
@@ -510,7 +550,6 @@ class TestGeeknoteConvertor(unittest.TestCase):
         vHTMLWriter = geeknoteConvertorLib.HTMLWriter(vOrgTable)
         vResult = vHTMLWriter.parseHTML()
 
-        print(vResult)
 
         vTarget = ["<TABLE>"
                    ,"<TR><TH>h0</TH><TH>h1</TH><TH>h2</TH><TH>h3</TH></TR>"
@@ -519,3 +558,92 @@ class TestGeeknoteConvertor(unittest.TestCase):
                    ,"</TABLE>"]
 
         self.assertEqual(vResult, vTarget)
+
+    def testGetCacheLocation(self):
+        vSource = ["Test A", "Line 1", "Word L", "Last"]
+        vTarget = [" 1", "Word"]
+
+        vCacheLocationStart = geeknoteConvertorLib.CacheLocation(1,4)
+        vCacheLocationEnd = geeknoteConvertorLib.CacheLocation(2,4)
+        vResult = geeknoteConvertorLib.getCacheLocation(vSource, vCacheLocationStart, vCacheLocationEnd)
+
+        self.assertEqual(vResult, vTarget)
+
+    def testReplaceCacheLocation(self):
+        vSource = ["Test A", "Line 1", "Word L", "Last"]
+        vTarget = ["Test A", "My", "Text", "Last"]
+
+        vReplacement = ["My", "Text"]
+
+        vCacheLocationStart = geeknoteConvertorLib.CacheLocation(1,0)
+        vCacheLocationEnd = geeknoteConvertorLib.CacheLocation(2,6)
+        vResult = geeknoteConvertorLib.replaceCacheLocation(vSource, vCacheLocationStart, vCacheLocationEnd, vReplacement)
+
+        self.assertEqual(vResult, vTarget)
+
+    def testReplaceCacheLocationWithin(self):
+        vSource = ["Test A", "Line 1", "Word L", "Last"]
+        vTarget = ["Test A", "Line My", "Text L", "Last"]
+
+        vReplacement = ["My", "Text"]
+
+        vCacheLocationStart = geeknoteConvertorLib.CacheLocation(1,5)
+        vCacheLocationEnd = geeknoteConvertorLib.CacheLocation(2,4)
+        vResult = geeknoteConvertorLib.replaceCacheLocation(vSource, vCacheLocationStart, vCacheLocationEnd, vReplacement)
+
+        self.assertEqual(vResult, vTarget)
+
+    def testReplaceCacheLocationDifirence(self):
+        vSource = ["Test A", "Line 1", "Word L", "Last"]
+        vTarget = ["Test A", "Line My", "Own", "Text L", "Last"]
+
+        vReplacement = ["My", "Own", "Text"]
+
+        vCacheLocationStart = geeknoteConvertorLib.CacheLocation(1,5)
+        vCacheLocationEnd = geeknoteConvertorLib.CacheLocation(2,4)
+        vResult = geeknoteConvertorLib.replaceCacheLocation(vSource, vCacheLocationStart, vCacheLocationEnd, vReplacement)
+
+        self.assertEqual(vResult, vTarget)
+    
+    def testTranslateOrgToHTMLTables(self):
+
+        vSource = ["Some randome text"
+                   ,"this is -> something"
+                   ,"| id | description |"
+                   ,"|----+-------------|"
+                   ,"| 1  | text        |"
+                   ,"Some other lines * -> Hello"
+                   ,"| id | XXxxxxxxxyy |"
+                   ,"|----+-------------|"
+                   ,"| 3  | None        |"
+                   ,"Hellosdlsf. End."]
+
+        vCache = geeknoteConvertorLib.cacheFile(vSource)
+        vResult = geeknoteConvertorLib.translateOrgToHTMLTables(vCache)
+    
+        vTarget = ["Some randome text", "this is -> something"
+                   ,"<TABLE>"
+                   ,"<TR><TH>id</TH><TH>description</TH></TR>"
+                   ,"<TR><TD>1</TD><TD>text</TD></TR>"
+                   ,"</TABLE>"
+                   ,"Some other lines * -> Hello"
+                   ,"<TABLE>"
+                   ,"<TR><TH>id</TH><TH>XXxxxxxxxyy</TH></TR>"
+                   ,"<TR><TD>3</TD><TD>None</TD></TR>"
+                   ,"</TABLE>"
+                   ,"Hellosdlsf. End."
+        ]
+
+        self.assertEqual(vResult, vTarget)
+
+    def testFullConversionToGeeknote(self):
+        vSourceFile = codecs.open(filename="./resources/test.org", mode="r", encoding="utf-8")
+        vDestinationFile = codecs.open(filename="./resources/test.out", mode="w+", encoding="utf-8")
+        try:
+            print('########################################')
+            geeknoteConvertorLib.org2ever(vSourceFile, vDestinationFile)
+        finally:
+            vSourceFile.close()
+            vDestinationFile.close()
+
+        

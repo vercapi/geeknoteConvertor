@@ -10,7 +10,7 @@
 
 ** Links
 
-[[www.google.com][Link to goolge]]
+[Link to goolge](www.google.com)
 
 ** Tables
 
@@ -21,18 +21,19 @@ Demo of a table
 |  1 | Page one    | This is some longer text |
 |  2 | Other thing | This is awesome          | 
 
+
 ** Code
 
 Let's insert some code
 
-#+BEGIN_SRC python :results output
+*+BEGIN_SRC python :results output
   
   x = 2 + 2
   print("The sum is: "+str(x))
   
-#+END_SRC python
+*+END_SRC python
 
-#+RESULTS:
+*+RESULTS:
 : The sum is: 4
 
 
