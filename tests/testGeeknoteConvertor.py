@@ -1,5 +1,4 @@
 import sys
-import os
 import codecs
 sys.path.append("../geeknoteConvertor")
 
@@ -376,64 +375,64 @@ class TestGeeknoteConvertor(unittest.TestCase):
 
 
     def testConvertToOrgLinkNotation(self):
-        source = ["[[www.google.be][Search]]"]
-        target = ["[Search](www.google.be)"]
+        target = ["[[www.google.be][Search]]"]
+        source = ["[www.google.be](Search)"]
 
         result = geeknoteConvertorLib.convertToOrgLinkNotation(source)
 
         self.assertEqual(result, target)
 
     def testConvertToOrgLinkNotationInText(self):
-        source = ["Here is some text and this is [[www.google.be][Search]] a link"]
-        target = ["Here is some text and this is [Search](www.google.be) a link"]
+        target = ["Here is some text and this is [[www.google.be][Search]] a link"]
+        source = ["Here is some text and this is [www.google.be](Search) a link"]
 
         result = geeknoteConvertorLib.convertToOrgLinkNotation(source)
 
         self.assertEqual(result, target)
 
     def testConvertToOrgLinkNotationDoubleInText(self):
-        source = ["Here is some [[www.emacs.org][emacs]] text and this is [[www.google.be][Search]] a link"]
-        target = ["Here is some [emacs](www.emacs.org) text and this is [Search](www.google.be) a link"]
+        target = ["Here is some [[www.emacs.org][emacs]] text and this is [[www.google.be][Search]] a link"]
+        source = ["Here is some [www.emacs.org](emacs) text and this is [www.google.be](Search) a link"]
 
         result = geeknoteConvertorLib.convertToOrgLinkNotation(source)
 
         self.assertEqual(result, target)
 
     def testConvertToOrgLinkNotationInTextNoLink(self):
-        source = ["Here is some text and this is [[www.google.be][Search]] a link", "no link"]
-        target = ["Here is some text and this is [Search](www.google.be) a link", "no link"]
+        target = ["Here is some text and this is [[www.google.be][Search]] a link", "no link"]
+        source = ["Here is some text and this is [www.google.be](Search) a link", "no link"]
 
         result = geeknoteConvertorLib.convertToOrgLinkNotation(source)
-
+        
         self.assertEqual(result, target)
 
     def testConvertToEvernoteLinkNotation(self):
-        source = ["[Search](www.google.be)"]
-        target = ["[[www.google.be][Search]]"]
+        target = ["[Search](www.google.be)"]
+        source = ["[[www.google.be][Search]]"]
 
         result = geeknoteConvertorLib.convertToEvernoteLinkNotation(source)
 
         self.assertEqual(result, target)
 
     def testConvertToEvernoteLinkNotationInText(self):
-        source = ["Here is some text and this is [Search](www.google.be) a link"]
-        target = ["Here is some text and this is [[www.google.be][Search]] a link"]
+        target = ["Here is some text and this is [Search](www.google.be) a link"]
+        source = ["Here is some text and this is [[www.google.be][Search]] a link"]
 
         result = geeknoteConvertorLib.convertToEvernoteLinkNotation(source)
 
         self.assertEqual(result, target)
 
     def testConvertToEvernoteLinkNotationDoubleInText(self):
-        source = ["Here is some [emacs](www.emacs.org) text and this is [Search](www.google.be) a link"]
-        target = ["Here is some [[www.emacs.org][emacs]] text and this is [[www.google.be][Search]] a link"]
+        target = ["Here is some [emacs](www.emacs.org) text and this is [Search](www.google.be) a link"]
+        source = ["Here is some [[www.emacs.org][emacs]] text and this is [[www.google.be][Search]] a link"]
 
         result = geeknoteConvertorLib.convertToEvernoteLinkNotation(source)
 
         self.assertEqual(result, target)
 
     def testConvertToEvernoteLinkNotationInTextNoLink(self):
-        source = ["Here is some text and this is [Search](www.google.be) a link", "no link"]
-        target = ["Here is some text and this is [[www.google.be][Search]] a link", "no link"]
+        target = ["Here is some text and this is [Search](www.google.be) a link", "no link"]
+        source = ["Here is some text and this is [[www.google.be][Search]] a link", "no link"]
 
         result = geeknoteConvertorLib.convertToEvernoteLinkNotation(source)
 
@@ -635,6 +634,22 @@ class TestGeeknoteConvertor(unittest.TestCase):
         ]
 
         self.assertEqual(vResult, vTarget)
+
+    def tesConvertTodoToEvernote(self):
+        source = "*** TODO This is a task"
+        target = "<en-todo/> This is a task"
+
+        result = geeknoteConvertorLib.convertTodoToEvernote(source)
+
+        self.assertEqual(target, result)
+
+    def tesConvertDoneToEvernote(self):
+        source = "*** DONE This is a task done"
+        target = "<en-todo checked=\"true\"/> This is a task done"
+
+        result = geeknoteConvertorLib.convertTodoToEvernote(source)
+
+        self.assertEqual(target, result)    
 
     def testFullConversionToGeeknote(self):
         vSourceFile = codecs.open(filename="./resources/test.org", mode="r", encoding="utf-8")

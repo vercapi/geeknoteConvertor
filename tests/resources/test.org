@@ -10,7 +10,7 @@
 
 ** Links
 
-[Link to Mgoolge](www.google.com)
+[[http://google.be][GoogleBE]]
 
 ** Tables
 

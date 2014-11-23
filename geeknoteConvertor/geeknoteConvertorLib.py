@@ -526,12 +526,9 @@ def convertToOrgLinkNotation(pSource):
 
         vNewLine = vLine
         while True:
-            vBegin = vNewLine.find("[[")
-            vEnd =  vNewLine.find("]]")
-            if vBegin < 0 or vEnd < 0:
+            vLinkResult = re.search("\[([^\]]*)\]\(([^\)]*)\)", vNewLine)
+            if not vLinkResult:
                 break
-
-            vLinkResult = re.search("\[\[([^\]]*)\]\[([^\]]*)\]\]", vNewLine)
             vLink = vLinkResult.group(1)
             vLinkName = vLinkResult.group(2)
 
@@ -552,9 +549,8 @@ def convertToEvernoteLinkNotation(pSource):
         vReplaced = False
 
         vNewLine = vLine
-        print('LINE: '+vLine)
         while True:
-            vLinkResult = re.search('\[\[([^\]]*)\]\[(([^\)]*))\]\]', vNewLine)
+            vLinkResult = re.search('\[\[([^\]]*)\]\[(([^\]]*))\]\]', vNewLine)
             if vLinkResult == None:
                 break
             vLink = vLinkResult.group(1)
