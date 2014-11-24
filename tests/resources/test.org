@@ -19,7 +19,7 @@ Demo of a table
 | id | name        | description              |
 |----+-------------+--------------------------|
 |  1 | Page one    | This is some longer text |
-|  2 | Other thing | This is awesome          | 
+|  2 | Other thing | This is awesome          |
 
 
 ** Code

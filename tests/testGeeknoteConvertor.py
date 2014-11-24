@@ -635,19 +635,35 @@ class TestGeeknoteConvertor(unittest.TestCase):
 
         self.assertEqual(vResult, vTarget)
 
-    def tesConvertTodoToEvernote(self):
-        source = "*** TODO This is a task"
-        target = "<en-todo/> This is a task"
+    def testConvertTodoToEvernote(self):
+        source = ["*** TODO This is a task"]
+        target = ["***<en-todo/> This is a task"]
 
         result = geeknoteConvertorLib.convertTodoToEvernote(source)
 
         self.assertEqual(target, result)
 
-    def tesConvertDoneToEvernote(self):
-        source = "*** DONE This is a task done"
-        target = "<en-todo checked=\"true\"/> This is a task done"
+    def testConvertDoneToEvernote(self):
+        source = ["*** DONE This is a task done"]
+        target = ["***<en-todo checked=\"true\"/> This is a task done"]
+        
+        result = geeknoteConvertorLib.convertDoneToEvernote(source)
 
-        result = geeknoteConvertorLib.convertTodoToEvernote(source)
+        self.assertEqual(target, result)
+
+    def testConvertTodoToOrg(self):
+        target = ["*** TODO This is a task"]
+        source = ["***<en-todo/> This is a task"]
+
+        result = geeknoteConvertorLib.convertTodoToOrg(source)
+
+        self.assertEqual(target, result)
+
+    def testConvertDoneToOrg(self):
+        target = ["*** DONE This is a task done"]
+        source = ["***<en-todo checked=\"true\"/> This is a task done"]
+
+        result = geeknoteConvertorLib.convertDoneToOrg(source)
 
         self.assertEqual(target, result)    
 
@@ -659,5 +675,3 @@ class TestGeeknoteConvertor(unittest.TestCase):
         finally:
             vSourceFile.close()
             vDestinationFile.close()
-
-        

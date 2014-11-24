@@ -2,6 +2,24 @@ import re
 from html.parser import HTMLParser
 from collections import namedtuple
 
+def cached(function):
+    def func_wrapper(pCache):
+        vCache = list()
+        for vLine in pCache:
+            vCache.append(function(vLine))
+
+        return vCache
+    return func_wrapper
+
+def regexrepl(function):
+    def func_wrapper(pLine):
+        vResult = function(pLine)
+        if vResult[1] > 0:
+            return vResult[0]
+        else:
+            return pLine
+        
+    return func_wrapper
 
 class HTMLToENML:
 
@@ -640,9 +658,32 @@ def translateOrgToHTMLTables(pCache):
 
     return vNewCache
 
+@cached
+@regexrepl
+def convertTodoToEvernote(pLine):
+    return  re.subn(r'(^\**) TODO', r'\1<en-todo/>', pLine)
+    
+
+@cached
+@regexrepl
+def convertDoneToEvernote(pLine):
+    return re.subn(r'(^\**) DONE', r'\1<en-todo checked="true"/>', pLine)
+
+@cached
+@regexrepl
+def convertTodoToOrg(pLine):
+    return re.subn(r'(^\**)<en-todo/>', r'\1 TODO', pLine)
+
+@cached
+@regexrepl
+def convertDoneToOrg(pLine):
+    return re.subn(r'(^\**)<en-todo checked="true"/>', r'\1 DONE', pLine)
+    
 
 def org2ever(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
+    vCache = convertDoneToEvernote(pCache = vCache)
+    vCache = convertTodoToEvernote(pCache = vCache)
     #vCache = removeHeader(vCache)
     #vCache = replaceCharFile(vCache, "****.", "1")
     vCache = convertToEvernoteLinkNotation(pSource=vCache)
@@ -667,6 +708,8 @@ def ever2org(pSourceFile, pDestinationFile):
  #   vCache = replaceCharFile(vCache, "#", "*")
  #   vCache = replaceCharFile(vCache, "1.", "****")
     vCache = convertToOrgLinkNotation(pSource=vCache)
+    vCache = convertDoneToOrg(pCache = vCache)
+    vCache = convertTodoToOrg(pCache = vCache)
     writeFile(pDestinationFile, vCache)
     
 def cacheFile(pSourceFile):
