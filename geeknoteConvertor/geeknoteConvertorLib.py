@@ -449,51 +449,6 @@ def replaceChar(pLine, pChar, pSubstitute):
     vResult = re.sub(re.escape(pChar), pSubstitute, pLine)
     return vResult
 
-def replaceTables(pSource):
-    vCache = pSource
-    
-    zero = CacheLocation.getZeroCacheLocation()
-    vStartLocation = OrgHTMLParser.findTableStart(zero, pSource)
-
-    while vStartLocation != CacheLocation.getNotFoundCacheLocation():
-        vEndLocation = OrgHTMLParser.findTableEnd(vStartLocation, vCache)
-        if vEndLocation > zero:
-            vNewCache = vCache[:vStartLocation.getLineNum()]
-            vLine = [vCache[vStartLocation.getLineNum()][:vStartLocation.getIndex()]]
-            if len(vLine[0]) > 0:
-                vNewCache += vLine
-            
-            vReplacement = [vCache[vStartLocation.getLineNum()][vStartLocation.getIndex():]]
-            vReplacement += vCache[vStartLocation.getLineNum()+1:vEndLocation.getLineNum()]
-            if vEndLocation.getLineNum() > vStartLocation.getLineNum():
-                vReplacement += [vCache[vEndLocation.getLineNum()][:vEndLocation.getIndex()]]
-
-            vParser = OrgHTMLParser()
-            vParser.feed(''.join(vReplacement))
-            vOrgTable = vParser.getTable()
-            vOrgWriter = OrgWriter(vOrgTable)
-            vNewCache += vOrgWriter.generate().splitlines()
-
-            vLine = [vCache[vEndLocation.getLineNum()][vEndLocation.getIndex()+1:]]
-            if len(vLine[0]) > 0:
-                vNewCache += vLine
-            vNewCache += vCache[vEndLocation.getLineNum()+1:]
-            vCache = vNewCache
-        vStartLocation = OrgHTMLParser.findTableStart(vEndLocation, vNewCache)
-
-    return vCache
-
-def removeHeader(pSource):
-    vCacheLocationStart = OrgHTMLParser.findFirstDiv(pSource)
-    vCacheLocationEnd = OrgHTMLParser.findLastDiv(pSource)
-
-    vStart = vCacheLocationStart.getLineNum()
-    vEnd = vCacheLocationEnd.getLineNum()
-    
-    #Assuming this block uses full lines and there is only 1 div
-    vCache = pSource[vEnd+1:]
-    return vCache
-
 def removeEmptyLines(pSource):
     while(len(pSource) > 0):
         vMatchEmptyLine = re.search("^[ ]*$", pSource[0])
@@ -667,7 +622,6 @@ def org2ever(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
     vCache = convertDoneToEvernote(pCache = vCache)
     vCache = convertTodoToEvernote(pCache = vCache)
-    #vCache = removeHeader(vCache)
     #vCache = replaceCharFile(vCache, "****.", "1")
     vCache = convertToEvernoteLinkNotation(pCache=vCache)
     vCache = escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
@@ -684,8 +638,6 @@ def org2ever(pSourceFile, pDestinationFile):
 def ever2org(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
     vCache = removeEmptyLines(vCache)
-#    vCache = removeHeader(vCache)
-#    vCache = replaceTables(vCache)
     vCache = completeOrgTableNotation(vCache)
     vCache = unescapeCharsFile(vCache, fEscapeChars)
  #   vCache = replaceCharFile(vCache, "#", "*")

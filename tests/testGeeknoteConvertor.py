@@ -266,33 +266,6 @@ class TestGeeknoteConvertor(unittest.TestCase):
         
         self.assertTrue(targetA >= targetB) 
 
-    def testReplaceTables(self):
-        #TODO: Source needs to be real tables, see comments below
-        source = ["bvnbvnvnbvn qsdqsdqd<table><tr><th>id</th><th>description</th></tr><tr><td>1</td><td>text</td></tr></table>","azeaeezaeae<ld/> sdfs","iopiipippp></p>"]
-        
-        target = ["bvnbvnvnbvn qsdqsdqd"]
-
-        targetStr =  "|----+-------------|\n"
-        targetStr += "| id | description |\n"
-        targetStr += "|----+-------------|\n"
-        targetStr += "| 1  | text        |\n"
-        targetStr += "|----+-------------|\n"
-        target += targetStr.splitlines()
-        target += ["azeaeezaeae<ld/> sdfs","iopiipippp></p>"]
-
-        result = geeknoteConvertorLib.replaceTables(source)
-
-
-        self.assertEqual(target, result)
-
-    def testCleanHTML(self):
-        source = ["<div kljsdlksjf","lksdfmlksdf", "</div>","</div>","This is the actual file"]
-        target = source[4:]
-
-        result = geeknoteConvertorLib.removeHeader(source)
-
-        self.assertEqual(result, target)
-
     def testRemoveEmptyLines(self):
         source = ["\n","","     ","\n", " ", "First Line", ""]
         target = ["First Line", ""]
