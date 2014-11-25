@@ -3,10 +3,10 @@ from html.parser import HTMLParser
 from collections import namedtuple
 
 def cached(function):
-    def func_wrapper(pCache):
+    def func_wrapper(pCache, *args):
         vCache = list()
         for vLine in pCache:
-            vCache.append(function(vLine))
+            vCache.append(function(vLine, *args))
 
         return vCache
     return func_wrapper
@@ -413,17 +413,9 @@ def openFile(pFileName):
     vFile =  open(pFileName, "w")
     return vFile
 
-"""
-Escape all occurances of chars in pChars in pFile(file) 
-backslash as it is defined in the markdown spec
-"""
-def processCharsFile(pSource, pChars, function):
-    vCache = list()
-    for line in pSource:
-        vResult = function(pLine=line, pChars=pChars)
-        vCache.append(vResult)
-
-    return vCache
+@cached
+def processCharsFile(pLine, pChars, function):
+    return function(pLine=pLine, pChars=pChars)
 
 def escapeCharsFile(pSource, pChars):
     return processCharsFile(pSource, pChars, escapeChars)
@@ -559,14 +551,10 @@ def convertToOrgLinkNotation(pSource):
             vCache.append(vLine)
 
     return vCache
-            
-def convertToEvernoteLinkNotation(pSource):
-    vCache = list()
-    for vLine in pSource:
-        vNewLine = ""
-        vReplaced = False
 
-        vNewLine = vLine
+@cached
+def convertToEvernoteLinkNotation(pLine):
+        vNewLine = pLine
         while True:
             vLinkResult = re.search('\[\[([^\]]*)\]\[(([^\]]*))\]\]', vNewLine)
             if vLinkResult == None:
@@ -578,13 +566,8 @@ def convertToEvernoteLinkNotation(pSource):
             vNewLine = vNewLine.replace(vLinkResult.group(0), vNewLink)
             vNewLine = vNewLine.replace('\\', '')
 
-        vCache.append(vNewLine)
-        vReplaced = True
+        return vNewLine
         
-        if not vReplaced:
-            vCache.append(vLine)
-
-    return vCache
 
 def convertToGeeknoteTable(pSource):
     vCache = list()
@@ -686,7 +669,7 @@ def org2ever(pSourceFile, pDestinationFile):
     vCache = convertTodoToEvernote(pCache = vCache)
     #vCache = removeHeader(vCache)
     #vCache = replaceCharFile(vCache, "****.", "1")
-    vCache = convertToEvernoteLinkNotation(pSource=vCache)
+    vCache = convertToEvernoteLinkNotation(pCache=vCache)
     vCache = escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='frame')
     # vCache = HTMLToENML.removeHtmlAttribute(pSource=vCache, pAttribute='rules')
