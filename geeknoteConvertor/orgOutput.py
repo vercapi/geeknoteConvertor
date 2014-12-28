@@ -3,15 +3,15 @@ from utils import cached, regexrepl
 
 def completeOrgTableNotation(pSource):
     vCache = list()
-    for vLine in pSource:
-        vNewLine = ""
+    for vIdx, vLine in enumerate(pSource):
+        vNewLine = vLine.rstrip()
 
         if vLine.find("|") >= 0:
             vLeadingPipe = re.search("^\|.*", vLine)
             if vLeadingPipe == None:
-                vNewLine = "|"+vLine
+                vNewLine = "|"+vNewLine
             else:
-                vNewLine = vLine
+                vNewLine = vNewLine
             
             vTrailingPipe = re.search(".*\|$", vLine)
             if vTrailingPipe == None:
@@ -19,9 +19,20 @@ def completeOrgTableNotation(pSource):
 
             vNewLine = vNewLine.replace("-|-", "-+-")
         else:
-            vNewLine = vLine    
-                
-        vCache.append(vNewLine)
+            vNextLine = ""
+            if(len(pSource) > vIdx+1):
+                vNextLine = pSource[vIdx+1]
+            print("NextLine: "+vNextLine)
+            print("current line:"+repr(vNewLine))
+            print("len: "+str(len(vNewLine)))
+            if len(vNewLine) == 0 and vNextLine.find("|") >= 0:
+                print('TRU4')
+                vNewLine = None
+            else:
+                vNewLine = vLine    
+
+        if vNewLine != None:
+            vCache.append(vNewLine)
 
     return vCache
 

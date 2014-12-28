@@ -1,3 +1,6 @@
+import sys
+sys.path.append(".")
+
 import re
 from utils import cached, regexrepl, cacheFile
 import enmlOutput

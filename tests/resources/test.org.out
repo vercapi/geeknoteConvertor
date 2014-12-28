@@ -3,24 +3,23 @@
 ** Hierararchy
 
 *** Sub item
-*** TODO This is a task
+***  This is a task
 
 **** Lowest level
-*** DONE This is a done task
+***  This is a done task
 
 ** Links
 
-[[GoogleBE][http://google.be]]
+[[ GoogleBE ][http://google.be]]
 
 ** Tables
 
 Demo of a table
 
-<TABLE>
-<TR><TH>id</TH><TH>name</TH><TH>description</TH></TR>
-<TR><TD>1</TD><TD>Page one</TD><TD>This is some longer text</TD></TR>
-<TR><TD>2</TD><TD>Other thing</TD><TD>This is awesome</TD></TR>
-</TABLE>
+|id  |  name  |  description|
+|---+---+---|
+|1  |  Page one  |  This is some longer text|
+|2  |  Other thing  |  This is awesome|
 
 
 ** Code
@@ -28,14 +27,12 @@ Demo of a table
 Let's insert some code
 
 *+BEGIN_SRC python :results output
-  
-  x = 2 + 2
-  print("The sum is: "+str(x))
-  
+
+x = 2 + 2
+print("The sum is: "+str(x))
+
 *+END_SRC python
 
 *+RESULTS:
 : The sum is: 4
-
-
 

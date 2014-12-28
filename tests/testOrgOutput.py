@@ -54,6 +54,13 @@ class TestOrgOuput(unittest.TestCase):
 
         self.assertEqual(result, target)
 
+    def testCompleteOrgTableNotationEmptyLine(self):
+        source = ["|Command  |  Key  |  Description", "", "|Test | A | nothing", ""]
+        target = ["|Command  |  Key  |  Description|", "|Test | A | nothing|", ""]
+
+        result = orgOutput.completeOrgTableNotation(source)
+
+        self.assertEqual(result, target)
 
     def testConvertToOrgLinkNotation(self):
         target = ["[[www.google.be][Search]]"]
