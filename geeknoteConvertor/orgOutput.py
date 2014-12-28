@@ -22,11 +22,7 @@ def completeOrgTableNotation(pSource):
             vNextLine = ""
             if(len(pSource) > vIdx+1):
                 vNextLine = pSource[vIdx+1]
-            print("NextLine: "+vNextLine)
-            print("current line:"+repr(vNewLine))
-            print("len: "+str(len(vNewLine)))
             if len(vNewLine) == 0 and vNextLine.find("|") >= 0:
-                print('TRU4')
                 vNewLine = None
             else:
                 vNewLine = vLine    
@@ -47,8 +43,8 @@ def convertToOrgLinkNotation(pSource):
             vLinkResult = re.search("\[([^\]]*)\]\(([^\)]*)\)", vNewLine)
             if not vLinkResult:
                 break
-            vLink = vLinkResult.group(1)
-            vLinkName = vLinkResult.group(2)
+            vLink = vLinkResult.group(2)
+            vLinkName = vLinkResult.group(1)
 
             vNewLink = "[["+vLink+"]["+vLinkName+"]]"
             vNewLine = vNewLine.replace(vLinkResult.group(0), vNewLink)

@@ -64,7 +64,7 @@ class TestOrgOuput(unittest.TestCase):
 
     def testConvertToOrgLinkNotation(self):
         target = ["[[www.google.be][Search]]"]
-        source = ["[www.google.be](Search)"]
+        source = ["[Search](www.google.be)"]
 
         result = orgOutput.convertToOrgLinkNotation(source)
 
@@ -72,7 +72,7 @@ class TestOrgOuput(unittest.TestCase):
 
     def testConvertToOrgLinkNotationInText(self):
         target = ["Here is some text and this is [[www.google.be][Search]] a link"]
-        source = ["Here is some text and this is [www.google.be](Search) a link"]
+        source = ["Here is some text and this is [Search](www.google.be) a link"]
 
         result = orgOutput.convertToOrgLinkNotation(source)
 
@@ -80,7 +80,7 @@ class TestOrgOuput(unittest.TestCase):
 
     def testConvertToOrgLinkNotationDoubleInText(self):
         target = ["Here is some [[www.emacs.org][emacs]] text and this is [[www.google.be][Search]] a link"]
-        source = ["Here is some [www.emacs.org](emacs) text and this is [www.google.be](Search) a link"]
+        source = ["Here is some [emacs](www.emacs.org) text and this is [Search](www.google.be) a link"]
 
         result = orgOutput.convertToOrgLinkNotation(source)
 
@@ -88,7 +88,7 @@ class TestOrgOuput(unittest.TestCase):
 
     def testConvertToOrgLinkNotationInTextNoLink(self):
         target = ["Here is some text and this is [[www.google.be][Search]] a link", "no link"]
-        source = ["Here is some text and this is [www.google.be](Search) a link", "no link"]
+        source = ["Here is some text and this is [Search](www.google.be) a link", "no link"]
 
         result = orgOutput.convertToOrgLinkNotation(source)
         
