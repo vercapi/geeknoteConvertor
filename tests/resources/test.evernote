@@ -1,18 +1,18 @@
-* Org objects
+\* Org objects
 
-** Hierararchy
+\*\* Hierararchy
 
-*** Sub item
-*** TODO This is a task
+\*\*\* Sub item
+\*\*\*<en-todo/> This is a task
 
-**** Lowest level
-*** DONE This is a done task
+\*\*\*\* Lowest level
+\*\*\*<en-todo checked="true"/> This is a done task
 
-** Links
+\*\* Links
 
-[[GoogleBE][http://google.be]]
+[GoogleBE](http://google.be)
 
-** Tables
+\*\* Tables
 
 Demo of a table
 
@@ -23,18 +23,18 @@ Demo of a table
 </TABLE>
 
 
-** Code
+\*\* Code
 
 Let's insert some code
 
-*+BEGIN_SRC python :results output
+\*+BEGIN\_SRC python :results output
   
   x = 2 + 2
   print("The sum is: "+str(x))
   
-*+END_SRC python
+\*+END\_SRC python
 
-*+RESULTS:
+\*+RESULTS:
 : The sum is: 4
 
 
