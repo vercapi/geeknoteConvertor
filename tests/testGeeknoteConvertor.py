@@ -99,6 +99,18 @@ class TestGeeknoteConvertor(unittest.TestCase):
         self.assertEqual(vResult, vTarget)
 
 
+    def testIsOrgModeFile(self):
+        vSource = ["# -*-Org-*-", "First line"]
+        
+        vResult = geeknoteConvertorLib.isOrgModeFile(vSource)
+        self.assertTrue(vResult)
+
+    def testIsOrgModeFileNot(self):
+        vSource = ["# Nothing", "First line"]
+        
+        vResult = geeknoteConvertorLib.isOrgModeFile(vSource)
+        self.assertFalse(vResult)
+
     def testFullConversionToGeeknote(self):
         vSourceFile = codecs.open(filename="./resources/test.org", mode="r", encoding="utf-8")
         vDestinationFile = codecs.open(filename="./resources/test.evernote.out", mode="w+", encoding="utf-8")

@@ -7,7 +7,17 @@ import enmlOutput
 import orgOutput
 
 # Characters to escape
-fEscapeChars = ["_", "*"]
+fEscapeChars = ["_", "*", "#"]
+fFileLocalMode = "# -*-Org-*-"
+
+def isOrgModeFile(pCache):
+    """
+    Check if the file needs to be converted or not
+    """
+    vFirstLine = pCache[0]
+    vResult = vFirstLine.find(fFileLocalMode)
+
+    return vResult >= 0
 
 """
 Open a file with name pFileName
@@ -64,22 +74,24 @@ def removeEmptyLines(pSource):
 
 def org2ever(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
-    vCache = enmlOutput.convertDoneToEvernote(pCache = vCache)
-    vCache = enmlOutput.convertTodoToEvernote(pCache = vCache)
-    vCache = enmlOutput.convertToEvernoteLinkNotation(pCache=vCache)
-    vCache = escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
-    vCache =  enmlOutput.translateOrgToHTMLTables(pCache = vCache)
-    writeFile(pDestinationFile, vCache)
+    if isOrgModeFile(vCache):
+        vCache = enmlOutput.convertDoneToEvernote(pCache = vCache)
+        vCache = enmlOutput.convertTodoToEvernote(pCache = vCache)
+        vCache = enmlOutput.convertToEvernoteLinkNotation(pCache=vCache)
+        vCache = escapeCharsFile(pSource=vCache, pChars=fEscapeChars)
+        vCache =  enmlOutput.translateOrgToHTMLTables(pCache = vCache)
+        writeFile(pDestinationFile, vCache)
 
 def ever2org(pSourceFile, pDestinationFile):
     vCache = cacheFile(pSourceFile)
-    vCache = removeEmptyLines(vCache)
-    vCache = orgOutput.completeOrgTableNotation(vCache)
-    vCache = unescapeCharsFile(vCache, fEscapeChars)
-    vCache = orgOutput.convertToOrgLinkNotation(pSource=vCache)
-    vCache = orgOutput.convertDoneToOrg(pCache = vCache)
-    vCache = orgOutput.convertTodoToOrg(pCache = vCache)
-    writeFile(pDestinationFile, vCache)
+    if isOrgModeFile(vCache):
+        vCache = removeEmptyLines(vCache)
+        vCache = orgOutput.completeOrgTableNotation(vCache)
+        vCache = unescapeCharsFile(vCache, fEscapeChars)
+        vCache = orgOutput.convertToOrgLinkNotation(pSource=vCache)
+        vCache = orgOutput.convertDoneToOrg(pCache = vCache)
+        vCache = orgOutput.convertTodoToOrg(pCache = vCache)
+        writeFile(pDestinationFile, vCache)
     
 
 def writeFile(pDestinationFile, pCache):
