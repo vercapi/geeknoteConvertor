@@ -1,6 +1,4 @@
-import sys
 import codecs
-sys.path.append("../geeknoteConvertor")
 
 import geeknoteConvertorLib
 import unittest
@@ -112,16 +110,16 @@ class TestGeeknoteConvertor(unittest.TestCase):
         self.assertFalse(vResult)
 
     def testFullConversionToGeeknote(self):
-        vSourceFile = codecs.open(filename="./resources/test.org", mode="r", encoding="utf-8")
-        vDestinationFile = codecs.open(filename="./resources/test.evernote.out", mode="w+", encoding="utf-8")
+        vSourceFile = codecs.open(filename="./tests/resources/test.org", mode="r", encoding="utf-8")
+        vDestinationFile = codecs.open(filename="./tests/resources/test.evernote.out", mode="w+", encoding="utf-8")
         try:
             geeknoteConvertorLib.org2ever(vSourceFile, vDestinationFile)
         finally:
             vSourceFile.close()
             vDestinationFile.close()
 
-        vResultFile = codecs.open(filename="./resources/test.evernote.out", mode="r", encoding="utf-8")
-        vTargetFile = codecs.open(filename="./resources/test.evernote.target", mode="r", encoding="utf-8")
+        vResultFile = codecs.open(filename="./tests/resources/test.evernote.out", mode="r", encoding="utf-8")
+        vTargetFile = codecs.open(filename="./tests/resources/test.evernote.target", mode="r", encoding="utf-8")
         
         try:
             vResult = utils.cacheFile(vResultFile)
@@ -134,16 +132,16 @@ class TestGeeknoteConvertor(unittest.TestCase):
             vTargetFile.close()
             
     def testFullConversionToOrgMode(self):
-        vSourceFile = codecs.open(filename="./resources/test.evernote", mode="r", encoding="utf-8")
-        vDestinationFile = codecs.open(filename="./resources/test.org.out", mode="w+", encoding="utf-8")
+        vSourceFile = codecs.open(filename="./tests/resources/test.evernote", mode="r", encoding="utf-8")
+        vDestinationFile = codecs.open(filename="./tests/resources/test.org.out", mode="w+", encoding="utf-8")
         try:
             geeknoteConvertorLib.ever2org(vSourceFile, vDestinationFile)
         finally:
             vSourceFile.close()
             vDestinationFile.close()
 
-        vResultFile = codecs.open(filename="./resources/test.org.out", mode="r", encoding="utf-8")
-        vTargetFile = codecs.open(filename="./resources/test.org.target", mode="r", encoding="utf-8")
+        vResultFile = codecs.open(filename="./tests/resources/test.org.out", mode="r", encoding="utf-8")
+        vTargetFile = codecs.open(filename="./tests/resources/test.org.target", mode="r", encoding="utf-8")
         
         try:
             vResult = utils.cacheFile(vResultFile)

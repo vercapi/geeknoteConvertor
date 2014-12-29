@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(name = "gnconvertor",
     version = "0.1",
@@ -6,7 +6,8 @@ setup(name = "gnconvertor",
     author = "Pieter Vercammen",
     author_email = "email@someplace.com",
     url = "whatever",
-    packages = ['geeknoteConvertor'],
+    packages = ['geeknoteConvertor', 'tests'],
     scripts = ["gnconvertor"],
-    long_description = """Convert between geeknote and cleartext/orgmode format""" 
+    long_description = """Convert between geeknote and cleartext/orgmode format""",
+    test_suite = "tests.suite.buildTestSuite"
 ) 
